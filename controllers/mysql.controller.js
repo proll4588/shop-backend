@@ -19,6 +19,6 @@ class DBController {
     }
 }
 
-const DB = new DBController({user: process.env.USER, password: process.env.PASSWORD, host: process.env.HOST, database: "goodsmanager"})
+const DB = new DBController({user: process.env.USER, password: process.env.PASSWORD, host: process.env.HOST, database: "shop"})
 
 export default DB
