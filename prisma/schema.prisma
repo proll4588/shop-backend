@@ -1,0 +1,87 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model brands {
+  id            Int             @id @default(autoincrement())
+  name          String          @unique(map: "brands_pk") @db.VarChar(100)
+  logo          String?         @db.VarChar(255)
+  goods_catalog goods_catalog[]
+}
+
+model global_type_goods {
+  id               Int                @id @unique(map: "id") @default(autoincrement())
+  name             String             @unique(map: "global_type_goods_pk") @db.VarChar(50)
+  photo            String?            @db.VarChar(255)
+  local_type_goods local_type_goods[]
+}
+
+model goods_catalog {
+  id                                    Int            @id @unique(map: "id") @default(autoincrement())
+  sub_type_goods_id                     Int
+  name                                  String         @db.VarChar(50)
+  description                           String?        @db.VarChar(1000)
+  main_photo                            String?        @db.VarChar(255)
+  brand_id                              Int?
+  price_id                              Int?           @unique(map: "goods_catalog_pk")
+  brands                                brands?        @relation(fields: [brand_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "goods_catalog_brands_id_fk")
+  prices                                prices?        @relation("goods_catalog_price_idToprices", fields: [price_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "goods_catalog_prices_null_fk")
+  sub_type_goods                        sub_type_goods @relation(fields: [sub_type_goods_id], references: [id], onUpdate: Restrict, map: "goods_catalog_sub_type_goods_id_fk")
+  goods_photo                           goods_photo[]
+  prices_goods_catalog_price_idToprices                                prices[]
+
+  @@index([brand_id], map: "goods_catalog_brands_id_fk")
+  @@index([name], map: "goods_catalog_name_index")
+  @@index([sub_type_goods_id], map: "goods_catalog_sub_type_goods_id_fk")
+}
+
+model goods_photo {
+  id               Int           @id @unique(map: "id") @default(autoincrement())
+  goods_catalog_id Int
+  photo            String        @db.VarChar(255)
+  goods_catalog    goods_catalog @relation(fields: [goods_catalog_id], references: [id], onUpdate: Restrict, map: "goods_photo_goods_catalog_id_fk")
+
+  @@index([goods_catalog_id], map: "goods_photo_goods_catalog_id_index")
+}
+
+model local_type_goods {
+  id                   Int               @id @unique(map: "id") @default(autoincrement())
+  global_type_goods_id Int
+  name                 String            @unique(map: "local_type_goods_pk") @db.VarChar(50)
+  photo                String?           @db.VarChar(255)
+  global_type_goods    global_type_goods @relation(fields: [global_type_goods_id], references: [id], onUpdate: Restrict, map: "local_type_goods_global_type_goods_null_fk")
+  sub_type_goods       sub_type_goods[]
+
+  @@index([global_type_goods_id], map: "local_type_goods_global_type_goods_null_fk")
+}
+
+model prices {
+  id                                           Int            @id @unique(map: "id") @default(autoincrement())
+  goods_catalog_id                             Int
+  price                                        Decimal        @db.Decimal(10, 2)
+  date                                         DateTime       @db.DateTime(0)
+  discount                                     Decimal?       @db.Decimal(10, 2)
+  goods_catalog                                goods_catalog  @relation(fields: [goods_catalog_id], references: [id], onUpdate: Restrict, map: "prices_goods_catalog_id_fk")
+  goods_catalog_goods_catalog_price_idToprices goods_catalog? @relation("goods_catalog_price_idToprices")
+
+  @@index([date, goods_catalog_id], map: "prices_date_goods_catalog_id_index")
+  @@index([date, price], map: "prices_date_price_index")
+  @@index([goods_catalog_id], map: "prices_goods_catalog_id_index")
+  @@index([price], map: "prices_price_index")
+}
+
+model sub_type_goods {
+  id                  Int              @id @unique(map: "id") @default(autoincrement())
+  local_type_goods_id Int
+  name                String           @unique(map: "sub_type_goods_pk") @db.VarChar(50)
+  photo               String?          @db.VarChar(255)
+  local_type_goods    local_type_goods @relation(fields: [local_type_goods_id], references: [id], onUpdate: Restrict, map: "sub_type_goods_local_type_goods_null_fk")
+  goods_catalog       goods_catalog[]
+
+  @@index([local_type_goods_id], map: "sub_type_goods_local_type_goods_null_fk")
+}
