@@ -22,29 +22,32 @@ model global_type_goods {
 }
 
 model goods_catalog {
-  id                                    Int            @id @unique(map: "id") @default(autoincrement())
-  sub_type_goods_id                     Int
-  name                                  String         @db.VarChar(50)
-  description                           String?        @db.VarChar(1000)
-  main_photo                            String?        @db.VarChar(255)
-  brand_id                              Int?
-  price_id                              Int?           @unique(map: "goods_catalog_pk")
-  brands                                brands?        @relation(fields: [brand_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "goods_catalog_brands_id_fk")
-  prices                                prices?        @relation("goods_catalog_price_idToprices", fields: [price_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "goods_catalog_prices_null_fk")
-  sub_type_goods                        sub_type_goods @relation(fields: [sub_type_goods_id], references: [id], onUpdate: Restrict, map: "goods_catalog_sub_type_goods_id_fk")
-  goods_photo                           goods_photo[]
-  prices_goods_catalog_price_idToprices                                prices[]
+  id                                                   Int            @id @unique(map: "id") @default(autoincrement())
+  sub_type_goods_id                                    Int
+  name                                                 String         @db.VarChar(50)
+  description                                          String?        @db.VarChar(1000)
+  main_photo_id                                        Int?
+  brand_id                                             Int?
+  price_id                                             Int?           @unique(map: "goods_catalog_pk")
+  brands                                               brands?        @relation(fields: [brand_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "goods_catalog_brands_id_fk")
+  main_photo goods_photo?                              @relation("goods_catalog_main_photo_idTogoods_photo", fields: [main_photo_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "goods_catalog_goods_photo_id_fk")
+  current_price                                               prices?        @relation("goods_catalog_price_idToprices", fields: [price_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "goods_catalog_prices_null_fk")
+  sub_type_goods                                       sub_type_goods @relation(fields: [sub_type_goods_id], references: [id], onUpdate: Restrict, map: "goods_catalog_sub_type_goods_id_fk")
+  all_photos                                           goods_photo[]
+  all_prices                prices[]
 
   @@index([brand_id], map: "goods_catalog_brands_id_fk")
   @@index([name], map: "goods_catalog_name_index")
   @@index([sub_type_goods_id], map: "goods_catalog_sub_type_goods_id_fk")
+  @@index([main_photo_id], map: "goods_catalog_goods_photo_id_fk")
 }
 
 model goods_photo {
-  id               Int           @id @unique(map: "id") @default(autoincrement())
-  goods_catalog_id Int
-  photo            String        @db.VarChar(255)
-  goods_catalog    goods_catalog @relation(fields: [goods_catalog_id], references: [id], onUpdate: Restrict, map: "goods_photo_goods_catalog_id_fk")
+  id                                                     Int             @id @unique(map: "id") @default(autoincrement())
+  goods_catalog_id                                       Int
+  photo                                                  String          @db.VarChar(255)
+  goods_catalog                                          goods_catalog   @relation(fields: [goods_catalog_id], references: [id], onUpdate: Restrict, map: "goods_photo_goods_catalog_id_fk")
+  goods_catalog_goods_catalog_main_photo_idTogoods_photo goods_catalog[] @relation("goods_catalog_main_photo_idTogoods_photo")
 
   @@index([goods_catalog_id], map: "goods_photo_goods_catalog_id_index")
 }
