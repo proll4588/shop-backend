@@ -8,14 +8,21 @@ const goodSelect = {
     name: true,
     description: true,
     main_photo: true,
-    brands: true,
-    sub_type_goods: true,
-    prices: {
+    all_photos: true,
+    current_price: {
         select: {
             price: true,
             discount: true,
         },
     },
+    all_prices: {
+        select: {
+            price: true,
+            discount: true,
+        },
+    },
+    brands: true,
+    sub_type_goods: true,
 }
 
 const createFilterQ = (filters) => {
@@ -39,7 +46,7 @@ const createFilterQ = (filters) => {
 
     return {
         OR: bq,
-        prices: prices,
+        current_price: prices,
     }
 }
 
@@ -127,6 +134,23 @@ const qGood = async (id) => {
     })
 }
 
+const qPhotos = async (id) => {
+    let ans = await prisma.goods_photo.findMany({
+        where: {
+            goods_catalog_id: id,
+        },
+        select: {
+            all_photos: true,
+        },
+    })
+
+    ans = ans.map((el) => {
+        return el.photo
+    })
+
+    return ans
+}
+
 // TODO: РЕализовать поиск минимальной и максимальной цены
 const resolvers = {
     Query: {
@@ -135,6 +159,7 @@ const resolvers = {
             await qGoods(subId, search, filters),
         brands: async (_, { subId }) => await qBrands(subId),
         good: async (_, { id }) => qGood(id),
+        photos: async (_, { id }) => qPhotos(id),
     },
 }
 
