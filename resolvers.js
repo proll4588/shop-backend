@@ -1,4 +1,3 @@
-import DB from './controllers/mysql.controller.js'
 import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
@@ -33,7 +32,7 @@ const createFilterQ = (filters) => {
             ? brands.map((el) => ({ brands: { name: el } }))
             : undefined
 
-    // TODO: Если у товара есть скидка то при поиске она не учитывается
+    // TODO: Если у товара есть скидка то при поиске она не учитывается(
     const prices =
         price.min || price.max
             ? {
@@ -134,23 +133,6 @@ const qGood = async (id) => {
     })
 }
 
-const qPhotos = async (id) => {
-    let ans = await prisma.goods_photo.findMany({
-        where: {
-            goods_catalog_id: id,
-        },
-        select: {
-            all_photos: true,
-        },
-    })
-
-    ans = ans.map((el) => {
-        return el.photo
-    })
-
-    return ans
-}
-
 // TODO: РЕализовать поиск минимальной и максимальной цены
 const resolvers = {
     Query: {
@@ -159,7 +141,6 @@ const resolvers = {
             await qGoods(subId, search, filters),
         brands: async (_, { subId }) => await qBrands(subId),
         good: async (_, { id }) => qGood(id),
-        photos: async (_, { id }) => qPhotos(id),
     },
 }
 

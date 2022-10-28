@@ -84,7 +84,6 @@ const typeDefs = gql`
         goods(subId: Int, search: String, filters: Filters): [Good]
         brands(subId: Int): [Brand]
         good(id: Int!): Good
-        photos(id: Int!): [String]
     }
 `
 
