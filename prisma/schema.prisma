@@ -14,6 +14,71 @@ model brands {
   goods_catalog goods_catalog[]
 }
 
+model characteristics_by_goods_types {
+  id                        Int                    @id @unique(map: "id") @default(autoincrement())
+  sub_type_goods_id         Int
+  characteristics_groups_id Int
+  characteristics_groups    characteristics_groups @relation(fields: [characteristics_groups_id], references: [id], onUpdate: Restrict, map: "characteristics_by_goods_types _characteristics_groups_id_fk")
+  sub_type_goods            sub_type_goods         @relation(fields: [sub_type_goods_id], references: [id], onUpdate: Restrict, map: "characteristics_by_goods_types _sub_type_goods_id_fk")
+
+  @@index([characteristics_groups_id], map: "characteristics_by_goods_types _characteristics_groups_id_fk")
+  @@index([sub_type_goods_id], map: "characteristics_by_goods_types _sub_type_goods_id_fk")
+}
+
+model characteristics_for_choice {
+  id                      Int                  @id @unique(map: "id") @default(autoincrement())
+  goods_catalog_id        Int
+  characteristics_list_id Int
+  characteristics_list    characteristics_list @relation(fields: [characteristics_list_id], references: [id], onUpdate: Restrict, map: "characteristics_for_choice_characteristics_list_id_fk")
+  goods_catalog           goods_catalog        @relation(fields: [goods_catalog_id], references: [id], onUpdate: Restrict, map: "characteristics_for_choice_goods_catalog_id_fk")
+
+  @@index([characteristics_list_id], map: "characteristics_for_choice_characteristics_list_id_fk")
+  @@index([goods_catalog_id], map: "characteristics_for_choice_goods_catalog_id_index")
+}
+
+model characteristics_for_filters {
+  id                      Int                  @id @unique(map: "id") @default(autoincrement())
+  sub_type_goods_id       Int
+  characteristics_list_id Int
+  characteristics_list    characteristics_list @relation(fields: [characteristics_list_id], references: [id], onUpdate: Restrict, map: "characteristics_for_filters_characteristics_list_id_fk")
+  sub_type_goods          sub_type_goods       @relation(fields: [sub_type_goods_id], references: [id], onUpdate: Restrict, map: "characteristics_for_filters_sub_type_goods_id_fk")
+
+  @@index([characteristics_list_id], map: "characteristics_for_filters_characteristics_list_id_fk")
+  @@index([sub_type_goods_id], map: "characteristics_for_filters_sub_type_goods_id_index")
+}
+
+model characteristics_groups {
+  id                             Int                              @id @unique(map: "id") @default(autoincrement())
+  name                           String                           @unique(map: "characteristics_groups_name_uindex") @db.VarChar(100)
+  characteristics_by_goods_types characteristics_by_goods_types[]
+  characteristics_list           characteristics_list[]
+}
+
+model characteristics_list {
+  id                          Int                           @id @unique(map: "id") @default(autoincrement())
+  characteristics_groups_id   Int
+  name                        String                        @db.VarChar(100)
+  description                 String?                       @db.VarChar(500)
+  is_custom_value             Boolean?                      @default(false)
+  characteristics_groups      characteristics_groups        @relation(fields: [characteristics_groups_id], references: [id], onUpdate: Restrict, map: "characteristics_list_characteristics_groups_id_fk")
+  characteristics_for_choice  characteristics_for_choice[]
+  characteristics_for_filters characteristics_for_filters[]
+  characteristics_params      characteristics_params[]
+  goods_characteristics       goods_characteristics[]
+
+  @@index([characteristics_groups_id], map: "characteristics_list_characteristics_groups_id_index")
+}
+
+model characteristics_params {
+  id                      Int                     @id @unique(map: "id") @default(autoincrement())
+  characteristics_list_id Int
+  value                   String?                 @db.VarChar(255)
+  characteristics_list    characteristics_list    @relation(fields: [characteristics_list_id], references: [id], onUpdate: Restrict, map: "characteristics_params_characteristics_list_id_fk")
+  goods_characteristics   goods_characteristics[]
+
+  @@index([characteristics_list_id], map: "characteristics_params_characteristics_list_id_index")
+}
+
 model global_type_goods {
   id               Int                @id @unique(map: "id") @default(autoincrement())
   name             String             @unique(map: "global_type_goods_pk") @db.VarChar(50)
@@ -22,32 +87,49 @@ model global_type_goods {
 }
 
 model goods_catalog {
-  id                                                   Int            @id @unique(map: "id") @default(autoincrement())
-  sub_type_goods_id                                    Int
-  name                                                 String         @db.VarChar(50)
-  description                                          String?        @db.VarChar(1000)
-  main_photo_id                                        Int?
-  brand_id                                             Int?
-  price_id                                             Int?           @unique(map: "goods_catalog_pk")
-  brands                                               brands?        @relation(fields: [brand_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "goods_catalog_brands_id_fk")
-  main_photo goods_photo?                              @relation("goods_catalog_main_photo_idTogoods_photo", fields: [main_photo_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "goods_catalog_goods_photo_id_fk")
-  current_price                                               prices?        @relation("goods_catalog_price_idToprices", fields: [price_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "goods_catalog_prices_null_fk")
-  sub_type_goods                                       sub_type_goods @relation(fields: [sub_type_goods_id], references: [id], onUpdate: Restrict, map: "goods_catalog_sub_type_goods_id_fk")
-  all_photos                                           goods_photo[]
-  all_prices                prices[]
+  id                                                      Int                          @id @unique(map: "id") @default(autoincrement())
+  sub_type_goods_id                                       Int
+  name                                                    String                       @db.VarChar(50)
+  description                                             String?                      @db.VarChar(1000)
+  main_photo_id                                           Int?
+  brand_id                                                Int?
+  price_id                                                Int?                         @unique(map: "goods_catalog_pk")
+  brands                                                  brands?                      @relation(fields: [brand_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "goods_catalog_brands_id_fk")
+  main_photo                                              goods_photo?                 @relation("goods_catalog_main_photo_idTogoods_photo", fields: [main_photo_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "goods_catalog_goods_photo_id_fk")
+  current_price                                           prices?                      @relation("goods_catalog_price_idToprices", fields: [price_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "goods_catalog_prices_null_fk")
+  sub_type_goods                                          sub_type_goods               @relation(fields: [sub_type_goods_id], references: [id], onUpdate: Restrict, map: "goods_catalog_sub_type_goods_id_fk")
+  characteristics_for_choice                              characteristics_for_choice[]
+  goods_characteristics                                   goods_characteristics[]
+  all_photos                                              goods_photo[]                @relation("goods_catalogTogoods_photo_goods_catalog_id")
+  all_prices                                              prices[]                     @relation("goods_catalogToprices_goods_catalog_id")
 
   @@index([brand_id], map: "goods_catalog_brands_id_fk")
+  @@index([main_photo_id], map: "goods_catalog_goods_photo_id_fk")
   @@index([name], map: "goods_catalog_name_index")
   @@index([sub_type_goods_id], map: "goods_catalog_sub_type_goods_id_fk")
-  @@index([main_photo_id], map: "goods_catalog_goods_photo_id_fk")
+}
+
+model goods_characteristics {
+  id                        Int                     @id @unique(map: "id") @default(autoincrement())
+  goods_catalog_id          Int
+  characteristics_list_id   Int
+  characteristics_params_id Int?
+  value                     String?                 @db.VarChar(100)
+  characteristics_list      characteristics_list    @relation(fields: [characteristics_list_id], references: [id], onUpdate: Restrict, map: "goods_characteristics_characteristics_list_id_fk")
+  characteristics_params    characteristics_params? @relation(fields: [characteristics_params_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "goods_characteristics_characteristics_params_id_fk")
+  goods_catalog             goods_catalog           @relation(fields: [goods_catalog_id], references: [id], onUpdate: Restrict, map: "goods_characteristics_goods_catalog_id_fk")
+
+  @@index([characteristics_list_id], map: "goods_characteristics_characteristics_list_id_fk")
+  @@index([characteristics_params_id], map: "goods_characteristics_characteristics_params_id_fk")
+  @@index([goods_catalog_id], map: "goods_characteristics_goods_catalog_id_index")
 }
 
 model goods_photo {
-  id                                                     Int             @id @unique(map: "id") @default(autoincrement())
-  goods_catalog_id                                       Int
-  photo                                                  String          @db.VarChar(255)
-  goods_catalog                                          goods_catalog   @relation(fields: [goods_catalog_id], references: [id], onUpdate: Restrict, map: "goods_photo_goods_catalog_id_fk")
-  goods_catalog_goods_catalog_main_photo_idTogoods_photo goods_catalog[] @relation("goods_catalog_main_photo_idTogoods_photo")
+  id                                                        Int             @id @unique(map: "id") @default(autoincrement())
+  goods_catalog_id                                          Int
+  photo                                                     String          @db.VarChar(255)
+  goods_catalog_goods_catalogTogoods_photo_goods_catalog_id goods_catalog   @relation("goods_catalogTogoods_photo_goods_catalog_id", fields: [goods_catalog_id], references: [id], onUpdate: Restrict, map: "goods_photo_goods_catalog_id_fk")
+  goods_catalog_goods_catalog_main_photo_idTogoods_photo    goods_catalog[] @relation("goods_catalog_main_photo_idTogoods_photo")
 
   @@index([goods_catalog_id], map: "goods_photo_goods_catalog_id_index")
 }
@@ -64,13 +146,13 @@ model local_type_goods {
 }
 
 model prices {
-  id                                           Int            @id @unique(map: "id") @default(autoincrement())
-  goods_catalog_id                             Int
-  price                                        Decimal        @db.Decimal(10, 2)
-  date                                         DateTime       @db.DateTime(0)
-  discount                                     Decimal?       @db.Decimal(10, 2)
-  goods_catalog                                goods_catalog  @relation(fields: [goods_catalog_id], references: [id], onUpdate: Restrict, map: "prices_goods_catalog_id_fk")
-  goods_catalog_goods_catalog_price_idToprices goods_catalog? @relation("goods_catalog_price_idToprices")
+  id                                                   Int            @id @unique(map: "id") @default(autoincrement())
+  goods_catalog_id                                     Int
+  price                                                Decimal        @db.Decimal(10, 2)
+  date                                                 DateTime       @db.DateTime(0)
+  discount                                             Decimal?       @db.Decimal(10, 2)
+  goods_catalog_goods_catalogToprices_goods_catalog_id goods_catalog  @relation("goods_catalogToprices_goods_catalog_id", fields: [goods_catalog_id], references: [id], onUpdate: Restrict, map: "prices_goods_catalog_id_fk")
+  goods_catalog_goods_catalog_price_idToprices         goods_catalog? @relation("goods_catalog_price_idToprices")
 
   @@index([date, goods_catalog_id], map: "prices_date_goods_catalog_id_index")
   @@index([date, price], map: "prices_date_price_index")
@@ -79,12 +161,14 @@ model prices {
 }
 
 model sub_type_goods {
-  id                  Int              @id @unique(map: "id") @default(autoincrement())
-  local_type_goods_id Int
-  name                String           @unique(map: "sub_type_goods_pk") @db.VarChar(50)
-  photo               String?          @db.VarChar(255)
-  local_type_goods    local_type_goods @relation(fields: [local_type_goods_id], references: [id], onUpdate: Restrict, map: "sub_type_goods_local_type_goods_null_fk")
-  goods_catalog       goods_catalog[]
+  id                             Int                              @id @unique(map: "id") @default(autoincrement())
+  local_type_goods_id            Int
+  name                           String                           @unique(map: "sub_type_goods_pk") @db.VarChar(50)
+  photo                          String?                          @db.VarChar(255)
+  local_type_goods               local_type_goods                 @relation(fields: [local_type_goods_id], references: [id], onUpdate: Restrict, map: "sub_type_goods_local_type_goods_null_fk")
+  characteristics_by_goods_types characteristics_by_goods_types[]
+  characteristics_for_filters    characteristics_for_filters[]
+  goods_catalog                  goods_catalog[]
 
   @@index([local_type_goods_id], map: "sub_type_goods_local_type_goods_null_fk")
 }
