@@ -133,6 +133,92 @@ const qGood = async (id) => {
     })
 }
 
+// Так получаем все типы, даже те которые не используются
+const qFilters = async (subId) => {
+    const ans = await prisma.characteristics_for_filters.findMany({
+        where: {
+            sub_type_goods_id: subId,
+        },
+        select: {
+            characteristics_list: {
+                include: {
+                    characteristics_params: true,
+                },
+            },
+        },
+    })
+
+    return ans
+}
+
+/*
+query Types($subId: Int!) {
+  filters(subId: $subId) {
+    characteristics_list {
+      id
+      name
+      is_custom_value
+      characteristics_params {
+        id
+        value
+      }
+    }
+  }
+}
+*/
+
+// Получаем даже те характеристики которые не прописаны, но в теории должны быть
+const qCharacteristics = async (goodId) => {
+    const ans = await prisma.characteristics_groups.findMany({
+        where: {
+            characteristics_list: {
+                some: {
+                    goods_characteristics: {
+                        some: {
+                            goods_catalog_id: goodId,
+                        },
+                    },
+                },
+            },
+        },
+        include: {
+            characteristics_list: {
+                include: {
+                    goods_characteristics: {
+                        include: {
+                            characteristics_params: true,
+                        },
+                    },
+                },
+            },
+        },
+    })
+
+    return ans
+}
+/*
+query Characteristics($goodId: Int!) {
+  characteristics(goodId: $goodId) {
+    id
+    name
+    characteristics_list {
+      id
+      name
+      description
+      is_custom_value
+      goods_characteristics {
+        id
+        value
+        characteristics_params {
+          value
+          id
+        }
+      }
+    }
+  }
+}
+*/
+
 // TODO: РЕализовать поиск минимальной и максимальной цены
 const resolvers = {
     Query: {
@@ -141,6 +227,8 @@ const resolvers = {
             await qGoods(subId, search, filters),
         brands: async (_, { subId }) => await qBrands(subId),
         good: async (_, { id }) => qGood(id),
+        filters: async (_, { subId }) => qFilters(subId),
+        characteristics: async (_, { goodId }) => qCharacteristics(goodId),
     },
 }
 

@@ -79,11 +79,48 @@ const typeDefs = gql`
         other: [OtherFilter]
     }
 
+    type Filter {
+        characteristics_list: Characteristic_list_el
+    }
+
+    type Good_characteristic {
+        id: Int
+        goods_catalog_id: Int
+        characteristics_list_id: Int
+        characteristics_params_id: Int
+        value: String
+        characteristics_params: Characteristics_param
+    }
+
+    type Characteristics_param {
+        id: Int
+        characteristics_list_id: Int
+        value: String
+    }
+
+    type Characteristic_list_el {
+        id: Int
+        characteristics_groups_id: Int
+        name: String
+        description: String
+        is_custom_value: Boolean
+        characteristics_params: [Characteristics_param]
+        goods_characteristics: [Good_characteristic]
+    }
+
+    type Characteristics_group {
+        id: Int
+        name: String
+        characteristics_list: [Characteristic_list_el]
+    }
+
     type Query {
         types: [GlobalGoodsType]
         goods(subId: Int, search: String, filters: Filters): [Good]
         brands(subId: Int): [Brand]
         good(id: Int!): Good
+        filters(subId: Int!): [Filter]
+        characteristics(goodId: Int!): [Characteristics_group]
     }
 `
 
