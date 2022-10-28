@@ -79,9 +79,9 @@ const typeDefs = gql`
         other: [OtherFilter]
     }
 
-    type Filter {
-        characteristics_list: Characteristic_list_el
-    }
+    #type Filter {
+    #    characteristics_list: Characteristic_list_el
+    #}
 
     type Good_characteristic {
         id: Int
@@ -119,9 +119,56 @@ const typeDefs = gql`
         goods(subId: Int, search: String, filters: Filters): [Good]
         brands(subId: Int): [Brand]
         good(id: Int!): Good
-        filters(subId: Int!): [Filter]
+        filters(subId: Int!): AllFilters
         characteristics(goodId: Int!): [Characteristics_group]
     }
+
+    ##########* Filters *###########
+
+    type AllFilters {
+        generalFilters: GeneralFilters!
+        typeFilters: [Filter]!
+    }
+
+    type GeneralFilters {
+        #shop
+        #rating
+        #discount
+        price: Filter!
+        brand: Filter!
+    }
+
+    enum FilterTypes {
+        list
+        range
+    }
+
+    type FilterListData {
+        values: [FiltersListDataElement]
+    }
+
+    type FiltersListDataElement {
+        id: Int!
+        value: String!
+    }
+
+    type FilterRangeData {
+        id: Int!
+
+        max: Float!
+        min: Float!
+    }
+
+    union FilterData = FilterListData | FilterRangeData
+
+    type Filter {
+        id: Int
+        name: String!
+        type: FilterTypes!
+        data: FilterData!
+    }
+
+    ########################
 `
 
 export default typeDefs

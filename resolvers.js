@@ -1,6 +1,5 @@
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
+import prisma from './controllers/prisma.controller.js'
+import { qAllFilters } from './resolvers/filters.js'
 
 const goodSelect = {
     id: true,
@@ -133,40 +132,6 @@ const qGood = async (id) => {
     })
 }
 
-// Так получаем все типы, даже те которые не используются
-const qFilters = async (subId) => {
-    const ans = await prisma.characteristics_for_filters.findMany({
-        where: {
-            sub_type_goods_id: subId,
-        },
-        select: {
-            characteristics_list: {
-                include: {
-                    characteristics_params: true,
-                },
-            },
-        },
-    })
-
-    return ans
-}
-
-/*
-query Types($subId: Int!) {
-  filters(subId: $subId) {
-    characteristics_list {
-      id
-      name
-      is_custom_value
-      characteristics_params {
-        id
-        value
-      }
-    }
-  }
-}
-*/
-
 // Получаем даже те характеристики которые не прописаны, но в теории должны быть
 const qCharacteristics = async (goodId) => {
     const ans = await prisma.characteristics_groups.findMany({
@@ -221,13 +186,22 @@ query Characteristics($goodId: Int!) {
 
 // TODO: РЕализовать поиск минимальной и максимальной цены
 const resolvers = {
+    // Проверка типа
+    FilterData: {
+        __resolveType: (obj) => {
+            return 'values' in obj ? 'FilterListData' : 'FilterRangeData'
+        },
+    },
     Query: {
         types: async () => await qTypes(),
         goods: async (_, { subId, search, filters }) =>
             await qGoods(subId, search, filters),
+
+        // Это уже не надо
         brands: async (_, { subId }) => await qBrands(subId),
+
         good: async (_, { id }) => qGood(id),
-        filters: async (_, { subId }) => qFilters(subId),
+        filters: async (_, { subId }) => qAllFilters(subId),
         characteristics: async (_, { goodId }) => qCharacteristics(goodId),
     },
 }
