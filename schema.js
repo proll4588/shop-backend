@@ -1,6 +1,7 @@
 import { gql } from 'apollo-server'
 
 const typeDefs = gql`
+    # Всевозможные типы товаров
     type GlobalGoodsType {
         id: Int
         name: String
@@ -21,17 +22,20 @@ const typeDefs = gql`
         photo: String
     }
 
+    # Брэнд (производитель)
     type Brand {
         id: Int
         name: String
         logo: String
     }
 
+    # Цена
     type Prices {
         price: Float
         discount: Float
     }
 
+    # Товар
     type Good {
         id: Int
         name: String
@@ -41,16 +45,6 @@ const typeDefs = gql`
         sub_type_goods: SubGoodsType
         prices: Prices
     }
-
-    #type PriceFilter {
-    #    strat: Float
-    #    end: Float
-    #}
-
-    #type BasicFilter {
-    #    brands: [Int]
-    #    prices: [PriceFilter]
-    #}
 
     input PriceFilter {
         min: Float
