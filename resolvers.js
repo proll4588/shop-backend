@@ -1,7 +1,7 @@
 import prisma from './controllers/prisma.controller.js'
-import { qAllFilters } from './resolvers/filters.js'
+import { qAllFilters, qFilteredGoods } from './resolvers/filters.js'
 
-const goodSelect = {
+export const goodSelect = {
     id: true,
     name: true,
     description: true,
@@ -60,7 +60,7 @@ const qTypes = async () =>
     })
 
 // TODO: Засунуть все параметры в filters
-const qGoods = async (subId, search, filters) => {
+const qGoods = async (subId, _, filters) => {
     let searchString = search
     let where = {}
 
@@ -194,14 +194,17 @@ const resolvers = {
     },
     Query: {
         types: async () => await qTypes(),
-        goods: async (_, { subId, search, filters }) =>
-            await qGoods(subId, search, filters),
+        filteredGoods: async (_, { filters, subId }) =>
+            qFilteredGoods(filters, subId),
+        good: async (_, { id }) => qGood(id),
+        filters: async (_, { subId }) => qAllFilters(subId),
 
         // Это уже не надо
         brands: async (_, { subId }) => await qBrands(subId),
+        goods: async (_, { subId, search, filters }) =>
+            await qGoods(subId, search, filters),
 
-        good: async (_, { id }) => qGood(id),
-        filters: async (_, { subId }) => qAllFilters(subId),
+        // В разработке
         characteristics: async (_, { goodId }) => qCharacteristics(goodId),
     },
 }

@@ -121,6 +121,7 @@ const typeDefs = gql`
         good(id: Int!): Good
         filters(subId: Int!): AllFilters
         characteristics(goodId: Int!): [Characteristics_group]
+        filteredGoods(subId: Int!, filters: AllFilterState): [Good]
     }
 
     ##########* Filters *###########
@@ -169,6 +170,30 @@ const typeDefs = gql`
     }
 
     ########################
+
+    input AllFilterState {
+        generalFilters: GeneralFilterState
+        typeFilters: [TypeFilterState]
+    }
+
+    input GeneralFilterState {
+        brand: [Int]
+        price: RangeFilterState
+    }
+
+    input RangeFilterState {
+        max: Float
+        min: Float
+    }
+
+    input ListFilterState {
+        values: [Int]
+    }
+
+    input TypeFilterState {
+        id: Int
+        state: [Int]
+    }
 `
 
 export default typeDefs

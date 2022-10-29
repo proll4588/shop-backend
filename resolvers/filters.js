@@ -1,4 +1,5 @@
 import prisma from '../controllers/prisma.controller.js'
+import { goodSelect } from '../resolvers.js'
 
 const getBrands = async (subId) => {
     const ans = await prisma.goods_catalog.findMany({
@@ -80,4 +81,47 @@ export const qAllFilters = async (subId) => {
         },
         typeFilters,
     }
+}
+
+export const qFilteredGoods = async (filters, subId) => {
+    if (filters === null) return []
+    return await prisma.goods_catalog.findMany({
+        where: {
+            AND: [
+                ...filters.typeFilters.map((filter) => {
+                    if (filter.state.length === 0) return
+                    return {
+                        goods_characteristics: {
+                            some: {
+                                OR: filter.state.map((state) => ({
+                                    characteristics_params_id: state,
+                                })),
+                            },
+                        },
+                    }
+                }),
+                {
+                    OR: filters.generalFilters.brand.map((brand) => ({
+                        brand_id: brand,
+                    })),
+                },
+                { sub_type_goods_id: subId },
+                {
+                    OR: {
+                        current_price: {
+                            price: {
+                                gte: filters.generalFilters.price.min
+                                    ? filters.generalFilters.price.min
+                                    : undefined,
+                                lte: filters.generalFilters.price.max
+                                    ? filters.generalFilters.price.max
+                                    : undefined,
+                            },
+                        },
+                    },
+                },
+            ],
+        },
+        select: goodSelect,
+    })
 }
