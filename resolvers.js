@@ -1,5 +1,6 @@
 import prisma from './controllers/prisma.controller.js'
 import { qAllFilters, qFilteredGoods } from './resolvers/filters.js'
+import { writeToFile } from './test.js'
 
 export const goodSelect = {
     id: true,
@@ -23,31 +24,6 @@ export const goodSelect = {
     sub_type_goods: true,
 }
 
-const createFilterQ = (filters) => {
-    const { brands, price, other } = filters
-
-    const bq =
-        brands && brands.length !== 0
-            ? brands.map((el) => ({ brands: { name: el } }))
-            : undefined
-
-    // TODO: Если у товара есть скидка то при поиске она не учитывается(
-    const prices =
-        price.min || price.max
-            ? {
-                  price: {
-                      gte: filters.price.min ? filters.price.min : undefined,
-                      lte: filters.price.max ? filters.price.max : undefined,
-                  },
-              }
-            : undefined
-
-    return {
-        OR: bq,
-        current_price: prices,
-    }
-}
-
 const qTypes = async () =>
     await prisma.global_type_goods.findMany({
         include: {
@@ -59,70 +35,6 @@ const qTypes = async () =>
         },
     })
 
-// TODO: Засунуть все параметры в filters
-const qGoods = async (subId, _, filters) => {
-    let searchString = search
-    let where = {}
-
-    if (!search) searchString = ''
-    if (filters) where = createFilterQ(filters)
-
-    if (subId) {
-        return await prisma.goods_catalog.findMany({
-            where: {
-                sub_type_goods_id: subId,
-                ...where,
-            },
-            select: goodSelect,
-        })
-    } else {
-        return await prisma.goods_catalog.findMany({
-            where: {
-                OR: [
-                    {
-                        name: {
-                            contains: searchString,
-                        },
-                    },
-                    {
-                        brands: {
-                            name: {
-                                contains: searchString,
-                            },
-                        },
-                    },
-                    {
-                        sub_type_goods: {
-                            name: {
-                                contains: searchString,
-                            },
-                        },
-                    },
-                ],
-                // TODO: Переопределение OR в объекте where
-                ...where,
-            },
-            select: goodSelect,
-        })
-    }
-}
-
-const qBrands = async (subId) => {
-    if (subId) {
-        const ans = await prisma.goods_catalog.findMany({
-            where: {
-                sub_type_goods_id: subId,
-            },
-            select: {
-                brands: true,
-            },
-        })
-        return ans.map((el) => el.brands)
-    }
-
-    return await prisma.brands.findMany()
-}
-
 const qGood = async (id) => {
     return await prisma.goods_catalog.findUnique({
         where: {
@@ -132,24 +44,15 @@ const qGood = async (id) => {
     })
 }
 
-// Получаем даже те характеристики которые не прописаны, но в теории должны быть
-const qCharacteristics = async (goodId) => {
+const qGoodCharacteristics = async (goodId) => {
     const ans = await prisma.characteristics_groups.findMany({
-        where: {
-            characteristics_list: {
-                some: {
-                    goods_characteristics: {
-                        some: {
-                            goods_catalog_id: goodId,
-                        },
-                    },
-                },
-            },
-        },
         include: {
             characteristics_list: {
                 include: {
                     goods_characteristics: {
+                        where: {
+                            goods_catalog_id: goodId,
+                        },
                         include: {
                             characteristics_params: true,
                         },
@@ -159,32 +62,37 @@ const qCharacteristics = async (goodId) => {
         },
     })
 
-    return ans
+    return (
+        ans
+            // Преобразуем данные в нужный формат
+            .map((group) => ({
+                id: group.id,
+                name: group.name,
+                items: group.characteristics_list.map((item) => ({
+                    id: item.id,
+                    name: item.name,
+                    value:
+                        item.goods_characteristics.length !== 0
+                            ? item.goods_characteristics[0]
+                                  .characteristics_params.value
+                            : null,
+                    description: item.description,
+                })),
+            }))
+            // Фильтруем данный
+            .map((group) => {
+                return {
+                    ...group,
+                    // Оставляем только те параметры у которых есть значения
+                    items: group.items.filter((item) => item.value !== null),
+                }
+            })
+            // Оставляем только те группы у еоторых есть заданные параметры
+            .filter((group) => group.items.length !== 0)
+    )
 }
-/*
-query Characteristics($goodId: Int!) {
-  characteristics(goodId: $goodId) {
-    id
-    name
-    characteristics_list {
-      id
-      name
-      description
-      is_custom_value
-      goods_characteristics {
-        id
-        value
-        characteristics_params {
-          value
-          id
-        }
-      }
-    }
-  }
-}
-*/
 
-// TODO: РЕализовать поиск минимальной и максимальной цены
+// TODO: Реализовать поиск минимальной и максимальной цены
 const resolvers = {
     // Проверка типа
     FilterData: {
@@ -198,14 +106,8 @@ const resolvers = {
             qFilteredGoods(filters, subId),
         good: async (_, { id }) => qGood(id),
         filters: async (_, { subId }) => qAllFilters(subId),
-
-        // Это уже не надо
-        brands: async (_, { subId }) => await qBrands(subId),
-        goods: async (_, { subId, search, filters }) =>
-            await qGoods(subId, search, filters),
-
-        // В разработке
-        characteristics: async (_, { goodId }) => qCharacteristics(goodId),
+        goodCharacteristics: async (_, { goodId }) =>
+            qGoodCharacteristics(goodId),
     },
 }
 
