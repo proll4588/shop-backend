@@ -59,7 +59,6 @@ model characteristics_list {
   characteristics_groups_id   Int
   name                        String                        @db.VarChar(100)
   description                 String?                       @db.VarChar(500)
-  is_custom_value             Boolean?                      @default(false)
   characteristics_groups      characteristics_groups        @relation(fields: [characteristics_groups_id], references: [id], onUpdate: Restrict, map: "characteristics_list_characteristics_groups_id_fk")
   characteristics_for_choice  characteristics_for_choice[]
   characteristics_for_filters characteristics_for_filters[]
@@ -114,7 +113,6 @@ model goods_characteristics {
   goods_catalog_id          Int
   characteristics_list_id   Int
   characteristics_params_id Int?
-  value                     String?                 @db.VarChar(100)
   characteristics_list      characteristics_list    @relation(fields: [characteristics_list_id], references: [id], onUpdate: Restrict, map: "goods_characteristics_characteristics_list_id_fk")
   characteristics_params    characteristics_params? @relation(fields: [characteristics_params_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "goods_characteristics_characteristics_params_id_fk")
   goods_catalog             goods_catalog           @relation(fields: [goods_catalog_id], references: [id], onUpdate: Restrict, map: "goods_characteristics_goods_catalog_id_fk")

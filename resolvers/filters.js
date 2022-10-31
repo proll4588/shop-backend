@@ -1,6 +1,7 @@
 import prisma from '../controllers/prisma.controller.js'
 import { goodSelect } from '../resolvers.js'
 
+/* Получение производителей по типу товара */
 const getBrands = async (subId) => {
     const ans = await prisma.goods_catalog.findMany({
         where: {
@@ -13,6 +14,7 @@ const getBrands = async (subId) => {
     return ans.map((el) => el.brands)
 }
 
+/* Получение фильтров типов */
 const getTypeFilters = async (subId) => {
     return await prisma.characteristics_for_filters.findMany({
         where: {
@@ -30,7 +32,7 @@ const getTypeFilters = async (subId) => {
 
 /* Формирование всех (общих и не только) фильтров для опр типа товара  */
 export const qAllFilters = async (subId) => {
-    // Получаем бренды в сыром виде и формируем объект фильтра
+    /* Получаем бренды в сыром виде и формируем объект фильтра */
     let brands = await getBrands(subId)
     const brand = {
         id: -1,
@@ -43,10 +45,10 @@ export const qAllFilters = async (subId) => {
             })),
         },
     }
-    ////////////////////
+    /*========================================================*/
 
     // TODO: Хард код!! Написать функцию которая бы находила max и min цену типа товаров
-    // Получаем min и max цену и формируем объект фильтра
+    /* Получаем min и max цену и формируем объект фильтра */
     const priceData = { min: 0, max: 10000, id: -2 }
     const price = {
         id: -2,
@@ -54,9 +56,9 @@ export const qAllFilters = async (subId) => {
         type: 'range',
         data: priceData,
     }
-    ////////////////////
+    /*========================================================*/
 
-    // Получаем фильтры типа и формируем массив объектов фильтров
+    /* Получаем фильтры типа и формируем массив объектов фильтров */
     const typeFiltersData = await getTypeFilters(subId)
     let typeFilters = typeFiltersData.map(({ characteristics_list }) => {
         return {
@@ -73,6 +75,7 @@ export const qAllFilters = async (subId) => {
             },
         }
     })
+    /*========================================================*/
 
     return {
         generalFilters: {
@@ -83,10 +86,12 @@ export const qAllFilters = async (subId) => {
     }
 }
 
+/* Поиск товароы по параметрам */
 export const qFilteredGoods = async (filters, subId) => {
     if (filters === null) return []
     return await prisma.goods_catalog.findMany({
         where: {
+            /* Поиск по параметрам типа */
             AND: [
                 ...filters.typeFilters.map((filter) => {
                     if (filter.state.length === 0) return
@@ -100,12 +105,18 @@ export const qFilteredGoods = async (filters, subId) => {
                         },
                     }
                 }),
+
+                /* Поиск по произвадителю */
                 {
                     OR: filters.generalFilters.brand.map((brand) => ({
                         brand_id: brand,
                     })),
                 },
+
+                /* Поиск по типу */
                 { sub_type_goods_id: subId },
+
+                /* Поиск по цене */
                 {
                     OR: {
                         current_price: {
