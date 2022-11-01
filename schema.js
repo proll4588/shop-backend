@@ -3,6 +3,9 @@ import { gql } from 'apollo-server'
 const typeDefs = gql`
     scalar Timestamp
 
+    ##########* Types *###########
+
+    # Глобальные типы товаров
     type GlobalGoodsType {
         id: Int
         name: String
@@ -10,6 +13,7 @@ const typeDefs = gql`
         local_type_goods: [LocalGoodsType]
     }
 
+    # Локальные типы товаров
     type LocalGoodsType {
         id: Int
         name: String
@@ -17,23 +21,31 @@ const typeDefs = gql`
         sub_type_goods: [SubGoodsType]
     }
 
+    # Подтипы(типы) Товароы
     type SubGoodsType {
         id: Int
         name: String
         photo: String
     }
 
+    ########################
+
+    ##########* Good *###########
+
+    # Произодитель
     type Brand {
         id: Int
         name: String
         logo: String
     }
 
+    # Основные данные цены
     type Price {
         price: Float
         discount: Float
     }
 
+    # Все данные о цене
     type FullPrice {
         id: Int
         goods_catalog_id: Int
@@ -42,6 +54,7 @@ const typeDefs = gql`
         discount: Float
     }
 
+    # Товар
     type Good {
         id: Int!
         name: String!
@@ -57,29 +70,24 @@ const typeDefs = gql`
         sub_type_goods: SubGoodsType
     }
 
+    # Фото товара
     type Photo {
         id: Int!
         goods_catalog_id: Int
         photo: String!
     }
 
-    type Query {
-        types: [GlobalGoodsType]
-        #goods(subId: Int, search: String, filters: Filters): [Good]
-        brands(subId: Int): [Brand]
-        good(id: Int!): Good
-        filters(subId: Int!): AllFilters
-        goodCharacteristics(goodId: Int!): [CharacteristicGroup]
-        filteredGoods(subId: Int!, filters: AllFilterState): [Good]
-    }
+    ########################
 
     ##########* Filters *###########
 
+    # Полный список всех фильтров товаров типа
     type AllFilters {
         generalFilters: GeneralFilters!
         typeFilters: [Filter]!
     }
 
+    # Фильтры, которые не зависят от типа товаров
     type GeneralFilters {
         #shop
         #rating
@@ -88,20 +96,27 @@ const typeDefs = gql`
         brand: Filter!
     }
 
+    # Типы фильтов
     enum FilterTypes {
+        # Список
         list
+
+        # В виде диапазона
         range
     }
 
+    # Данные для списка фильтра
     type FilterListData {
         values: [FiltersListDataElement]
     }
 
+    # Данные одного элемента списка фильтров
     type FiltersListDataElement {
         id: Int!
         value: String!
     }
 
+    # Данные для фильтра диапазона
     type FilterRangeData {
         id: Int!
 
@@ -109,8 +124,10 @@ const typeDefs = gql`
         min: Float!
     }
 
+    # Объединение данных фильтров в виде списка и в виде диапазона
     union FilterData = FilterListData | FilterRangeData
 
+    # Данные о фильтре
     type Filter {
         id: Int
         name: String!
@@ -118,7 +135,7 @@ const typeDefs = gql`
         data: FilterData!
     }
 
-    ##inputs
+    ###* inputs * ###
 
     input AllFilterState {
         generalFilters: GeneralFilterState
@@ -148,12 +165,14 @@ const typeDefs = gql`
 
     ##########* Characteristic *###########
 
+    # Группа характеристик
     type CharacteristicGroup {
         id: Int!
         name: String!
         items: [CharacteristicItem]!
     }
 
+    # элемент группы характеристики
     type CharacteristicItem {
         id: Int!
         name: String!
@@ -162,6 +181,16 @@ const typeDefs = gql`
     }
 
     ########################
+
+    ##########* Запросы *###########
+    type Query {
+        types: [GlobalGoodsType]
+        brands(subId: Int): [Brand]
+        good(id: Int!): Good
+        filters(subId: Int!): AllFilters
+        goodCharacteristics(goodId: Int!): [CharacteristicGroup]
+        filteredGoods(subId: Int!, filters: AllFilterState): [Good]
+    }
 `
 
 export default typeDefs

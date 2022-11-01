@@ -1,6 +1,6 @@
 import prisma from './controllers/prisma.controller.js'
 import { qAllFilters, qFilteredGoods } from './resolvers/filters.js'
-import { writeToFile } from './test.js'
+// import { writeToFile } from './test.js'
 
 export const goodSelect = {
     id: true,
