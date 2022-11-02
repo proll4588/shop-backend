@@ -97,10 +97,13 @@ model goods_catalog {
   main_photo                 goods_photo?                 @relation("goods_catalog_main_photo_idTogoods_photo", fields: [main_photo_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "goods_catalog_goods_photo_id_fk")
   current_price              prices?                      @relation("goods_catalog_price_idToprices", fields: [price_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "goods_catalog_prices_null_fk")
   sub_type_goods             sub_type_goods               @relation(fields: [sub_type_goods_id], references: [id], onUpdate: Restrict, map: "goods_catalog_sub_type_goods_id_fk")
+  cart                       cart[]
   characteristics_for_choice characteristics_for_choice[]
+  favorite_goods             favorite_goods[]
   goods_characteristics      goods_characteristics[]
   all_photos                 goods_photo[]                @relation("goods_catalogTogoods_photo_goods_catalog_id")
   all_prices                 prices[]                     @relation("goods_catalogToprices_goods_catalog_id")
+  rating                     rating[]
 
   @@index([brand_id], map: "goods_catalog_brands_id_fk")
   @@index([main_photo_id], map: "goods_catalog_goods_photo_id_fk")
@@ -109,13 +112,13 @@ model goods_catalog {
 }
 
 model goods_characteristics {
-  id                        Int                     @id @unique(map: "id") @default(autoincrement())
+  id                        Int                    @id @unique(map: "id") @default(autoincrement())
   goods_catalog_id          Int
   characteristics_list_id   Int
-  characteristics_params_id Int?
-  characteristics_list      characteristics_list    @relation(fields: [characteristics_list_id], references: [id], onUpdate: Restrict, map: "goods_characteristics_characteristics_list_id_fk")
-  characteristics_params    characteristics_params? @relation(fields: [characteristics_params_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "goods_characteristics_characteristics_params_id_fk")
-  goods_catalog             goods_catalog           @relation(fields: [goods_catalog_id], references: [id], onUpdate: Restrict, map: "goods_characteristics_goods_catalog_id_fk")
+  characteristics_params_id Int
+  characteristics_list      characteristics_list   @relation(fields: [characteristics_list_id], references: [id], onUpdate: Restrict, map: "goods_characteristics_characteristics_list_id_fk")
+  characteristics_params    characteristics_params @relation(fields: [characteristics_params_id], references: [id], onUpdate: Restrict, map: "goods_characteristics_characteristics_params_id_fk")
+  goods_catalog             goods_catalog          @relation(fields: [goods_catalog_id], references: [id], onUpdate: Restrict, map: "goods_characteristics_goods_catalog_id_fk")
 
   @@index([characteristics_list_id], map: "goods_characteristics_characteristics_list_id_fk")
   @@index([characteristics_params_id], map: "goods_characteristics_characteristics_params_id_fk")
@@ -169,4 +172,68 @@ model sub_type_goods {
   goods_catalog                  goods_catalog[]
 
   @@index([local_type_goods_id], map: "sub_type_goods_local_type_goods_null_fk")
+}
+
+model address {
+  id           Int     @id @unique(map: "id") @default(autoincrement())
+  country_code String  @db.Char(3)
+  city         String  @db.VarChar(100)
+  street       String  @db.VarChar(100)
+  house        String? @db.VarChar(10)
+  users        users[]
+
+  @@index([country_code], map: "address_country_Code_fk")
+}
+
+model cart {
+  id               Int           @id @unique(map: "id") @default(autoincrement())
+  goods_catalog_id Int
+  users_id         Int
+  count            Int           @default(1)
+  goods_catalog    goods_catalog @relation(fields: [goods_catalog_id], references: [id], onUpdate: Restrict, map: "cart_goods_catalog_id_fk")
+  users            users         @relation(fields: [users_id], references: [id], onUpdate: Restrict, map: "cart_users_id_fk")
+
+  @@index([goods_catalog_id], map: "cart_goods_catalog_id_fk")
+  @@index([users_id], map: "cart_users_id_fk")
+}
+
+model favorite_goods {
+  id               Int           @id @unique(map: "id") @default(autoincrement())
+  goods_catalog_id Int
+  users_id         Int
+  goods_catalog    goods_catalog @relation(fields: [goods_catalog_id], references: [id], onUpdate: Restrict, map: "table_name_goods_catalog_id_fk")
+  users            users         @relation(fields: [users_id], references: [id], onUpdate: Restrict, map: "table_name_users_id_fk")
+
+  @@index([goods_catalog_id], map: "table_name_goods_catalog_id_fk")
+  @@index([users_id], map: "table_name_users_id_fk")
+}
+
+model rating {
+  id               Int           @id @unique(map: "id") @default(autoincrement())
+  goods_catalog_id Int
+  users_id         Int
+  rating           Int
+  text             String?       @db.VarChar(1000)
+  date             DateTime      @db.Date
+  goods_catalog    goods_catalog @relation(fields: [goods_catalog_id], references: [id], onUpdate: Restrict, map: "rating_goods_catalog_id_fk")
+
+  @@index([goods_catalog_id], map: "rating_goods_catalog_id_fk")
+}
+
+model users {
+  id               Int              @id @unique(map: "id") @default(autoincrement())
+  fname            String?          @db.VarChar(50)
+  lname            String?          @db.VarChar(50)
+  email            String           @db.VarChar(50)
+  phone_number     String?          @db.VarChar(12)
+  gender           Boolean?
+  date_of_birthday DateTime?        @db.Date
+  address_id       Int?
+  photo            String?          @db.VarChar(255)
+  password         String           @db.VarChar(255)
+  address          address?         @relation(fields: [address_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "users_address_id_fk")
+  cart             cart[]
+  favorite_goods   favorite_goods[]
+
+  @@index([address_id], map: "users_address_id_fk")
 }
