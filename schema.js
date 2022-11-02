@@ -182,14 +182,47 @@ const typeDefs = gql`
 
     ########################
 
+    ##########* Characteristic *###########
+
+    type User {
+        id: Int!
+
+        fname: String
+        lname: String
+
+        email: String!
+        phone_number: String
+
+        gender: Int
+        photo: String
+    }
+
+    ########################
+
     ##########* Запросы *###########
+
     type Query {
         types: [GlobalGoodsType]
-        brands(subId: Int): [Brand]
         good(id: Int!): Good
         filters(subId: Int!): AllFilters
         goodCharacteristics(goodId: Int!): [CharacteristicGroup]
         filteredGoods(subId: Int!, filters: AllFilterState): [Good]
+
+        login(email: String!, password: String!): Token
+        verifyToken: Verify
+        user: User
+    }
+
+    type Mutation {
+        registration(email: String!, password: String!): Ans
+    }
+
+    type Token {
+        token: String!
+    }
+
+    type Verify {
+        verify: Boolean
     }
 `
 

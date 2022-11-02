@@ -5,6 +5,7 @@ import { ApolloServerPluginLandingPageLocalDefault } from 'apollo-server-core'
 import resolvers from './resolvers.js'
 import typeDefs from './schema.js'
 import { TimestampResolver, TimestampTypeDefinition } from 'graphql-scalars'
+import { context } from './auth.js'
 
 const server = new ApolloServer({
     typeDefs: [TimestampTypeDefinition, typeDefs],
@@ -12,6 +13,7 @@ const server = new ApolloServer({
     csrfPrevention: true,
     cache: 'bounded',
     plugins: [ApolloServerPluginLandingPageLocalDefault({ embed: true })],
+    context: context,
 })
 
 server.listen().then(({ url }) => {

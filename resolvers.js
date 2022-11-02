@@ -1,6 +1,6 @@
 import prisma from './controllers/prisma.controller.js'
+import { qLogin, qReg, qUser, qVerifyToken } from './resolvers/auth.js'
 import { qAllFilters, qFilteredGoods } from './resolvers/filters.js'
-// import { writeToFile } from './test.js'
 
 export const goodSelect = {
     id: true,
@@ -108,6 +108,13 @@ const resolvers = {
         filters: async (_, { subId }) => qAllFilters(subId),
         goodCharacteristics: async (_, { goodId }) =>
             qGoodCharacteristics(goodId),
+        login: async (_, { email, password }) => await qLogin(email, password),
+        verifyToken: (_, __, context) => qVerifyToken(context),
+        user: async (_, __, context) => await qUser(context),
+    },
+    Mutation: {
+        registration: async (_, { email, password }) =>
+            await qReg(email, password),
     },
 }
 
