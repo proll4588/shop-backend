@@ -214,7 +214,7 @@ const typeDefs = gql`
     }
 
     type Mutation {
-        registration(email: String!, password: String!): Ans
+        registration(email: String!, password: String!): Token
     }
 
     type Token {
