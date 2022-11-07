@@ -1,96 +1,77 @@
-import prisma from './controllers/prisma.controller.js'
-import { qLogin, qReg, qUser, qVerifyToken } from './resolvers/auth.js'
-import { qAllFilters, qFilteredGoods } from './resolvers/filters.js'
+import { checkUserAuth, login, registrate, VerifyToken } from './auth.js'
+import {
+    addGoodToFavorite,
+    getFavoriteGoods,
+    getGoodById,
+    getGoodsByFlters,
+    getTypes,
+    removeGoodFromFavorite,
+} from './models/Good/good.js'
+import { getAllGoodsFilters } from './models/Filters/filters.js'
+import { getUserById } from './models/User/user.js'
+import { getGoodCharacteristics } from './models/Characteristics/characteristics.js'
 
-export const goodSelect = {
-    id: true,
-    name: true,
-    description: true,
-    main_photo: true,
-    all_photos: true,
-    current_price: {
-        select: {
-            price: true,
-            discount: true,
-        },
-    },
-    all_prices: {
-        select: {
-            price: true,
-            discount: true,
-        },
-    },
-    brands: true,
-    sub_type_goods: true,
+/*========================/ Controles /=============================*/
+
+/* Good */
+
+// --Без авторизации
+const qTypes = async () => await getTypes()
+const qGood = async (goodId) => await getGoodById(goodId)
+const qFilteredGoods = async (filters, subId) =>
+    await getGoodsByFlters(filters, subId)
+
+// --С авторизацией
+const qGetFavorite = async (context) => {
+    checkUserAuth(context)
+    const { userId } = context
+    return await getFavoriteGoods(userId)
 }
-
-const qTypes = async () =>
-    await prisma.global_type_goods.findMany({
-        include: {
-            local_type_goods: {
-                include: {
-                    sub_type_goods: true,
-                },
-            },
-        },
-    })
-
-const qGood = async (id) => {
-    return await prisma.goods_catalog.findUnique({
-        where: {
-            id: id,
-        },
-        select: goodSelect,
-    })
+const qAddToFavorite = async (context, goodId) => {
+    checkUserAuth(context)
+    const { userId } = context
+    try {
+        return await addGoodToFavorite(userId, goodId)
+    } catch (e) {
+        throwNewGQLError(e)
+    }
 }
-
-const qGoodCharacteristics = async (goodId) => {
-    const ans = await prisma.characteristics_groups.findMany({
-        include: {
-            characteristics_list: {
-                include: {
-                    goods_characteristics: {
-                        where: {
-                            goods_catalog_id: goodId,
-                        },
-                        include: {
-                            characteristics_params: true,
-                        },
-                    },
-                },
-            },
-        },
-    })
-
-    return (
-        ans
-            // Преобразуем данные в нужный формат
-            .map((group) => ({
-                id: group.id,
-                name: group.name,
-                items: group.characteristics_list.map((item) => ({
-                    id: item.id,
-                    name: item.name,
-                    value:
-                        item.goods_characteristics.length !== 0
-                            ? item.goods_characteristics[0]
-                                  .characteristics_params.value
-                            : null,
-                    description: item.description,
-                })),
-            }))
-            // Фильтруем данный
-            .map((group) => {
-                return {
-                    ...group,
-                    // Оставляем только те параметры у которых есть значения
-                    items: group.items.filter((item) => item.value !== null),
-                }
-            })
-            // Оставляем только те группы у еоторых есть заданные параметры
-            .filter((group) => group.items.length !== 0)
-    )
+const qRemoveFromFavorite = async (context, goodId) => {
+    checkUserAuth(context)
+    const { userId } = context
+    try {
+        return await removeGoodFromFavorite(userId, goodId)
+    } catch (e) {
+        throwNewGQLError(e)
+    }
 }
+/* ================================================= */
+
+/* Filters */
+const qAllFilters = async (typeId) => await getAllGoodsFilters(typeId)
+/* ================================================= */
+
+/* Auth */
+const qLogin = async (email, password) => await login(email, password)
+const qRegistrate = async (email, password) => await registrate(email, password)
+const qVerifyToken = (context) => VerifyToken(context)
+/* ================================================= */
+
+/* User */
+// С авторизацией
+const qUser = async (context) => {
+    checkUserAuth(context)
+    const { userId } = context
+    return await getUserById(userId)
+}
+/* ======= */
+
+/* Characteristics */
+const qGoodCharacteristics = async (goodId) =>
+    await getGoodCharacteristics(goodId)
+/* ======= */
+
+/*==================================================================*/
 
 // TODO: Реализовать поиск минимальной и максимальной цены
 const resolvers = {
@@ -101,20 +82,50 @@ const resolvers = {
         },
     },
     Query: {
+        /* Good */
         types: async () => await qTypes(),
+        good: async (_, { id }) => await qGood(id),
         filteredGoods: async (_, { filters, subId }) =>
             qFilteredGoods(filters, subId),
-        good: async (_, { id }) => qGood(id),
-        filters: async (_, { subId }) => qAllFilters(subId),
-        goodCharacteristics: async (_, { goodId }) =>
-            qGoodCharacteristics(goodId),
+
+        getFavorite: async (_, __, context) =>
+            checkUserAuth(context) && (await qGetFavorite(context)),
+        /* ======= */
+
+        /* Filters */
+        filters: async (_, { subId }) => await qAllFilters(subId),
+        /* ======= */
+
+        /* Auth */
         login: async (_, { email, password }) => await qLogin(email, password),
         verifyToken: (_, __, context) => qVerifyToken(context),
+        /* ======= */
+
+        /* User */
         user: async (_, __, context) => await qUser(context),
+        /* ======= */
+
+        /* Characteristics */
+        goodCharacteristics: async (_, { goodId }) =>
+            qGoodCharacteristics(goodId),
+        /* ======= */
     },
     Mutation: {
+        /* Good */
+        addToFavorite: async (_, { goodId }, context) =>
+            qAddToFavorite(context, goodId),
+        removeFavorite: async (_, { goodId }, context) =>
+            qRemoveFromFavorite(context, goodId),
+        /* ======= */
+
+        /* Auth */
         registration: async (_, { email, password }) =>
-            await qReg(email, password),
+            await qRegistrate(email, password),
+        /* ======= */
+        //
+
+        // updateUserData: async (_, { userData }, context) =>
+        //     checkUserAuth(context) && qUpdateUserData(context, userData),
     },
 }
 

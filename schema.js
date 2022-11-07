@@ -182,23 +182,6 @@ const typeDefs = gql`
 
     ########################
 
-    ##########* Characteristic *###########
-
-    type User {
-        id: Int!
-
-        fname: String
-        lname: String
-
-        email: String!
-        phone_number: String
-
-        gender: Int
-        photo: String
-    }
-
-    ########################
-
     ##########* Запросы *###########
 
     type Query {
@@ -211,10 +194,17 @@ const typeDefs = gql`
         login(email: String!, password: String!): Token
         verifyToken: Verify
         user: User
+
+        getFavorite: [Favorite]
     }
 
     type Mutation {
         registration(email: String!, password: String!): Token
+
+        addToFavorite(goodId: Int!): [Favorite]
+        removeFavorite(goodId: Int!): [Favorite]
+
+        #updateUserData(userData: UserData): User
     }
 
     type Token {
@@ -223,6 +213,55 @@ const typeDefs = gql`
 
     type Verify {
         verify: Boolean
+    }
+
+    type Favorite {
+        id: Int!
+        goods_catalog_id: Int!
+        users_id: Int!
+    }
+
+    ##########* Пользователь *###########
+
+    type User {
+        id: Int!
+
+        fname: String
+        lname: String
+
+        email: String!
+        phone_number: String
+        gender: Int
+        address: Address
+        photo: String
+    }
+
+    type Address {
+        id: Int!
+        country_code: String
+        city: String
+        street: String
+        house: String
+    }
+
+    input UserData {
+        user: UserInfo
+        address: AddresInfo
+    }
+
+    input UserInfo {
+        fname: String
+        lname: String
+        phone_number: String
+        gender: Boolean
+        photo: String
+    }
+
+    input AddresInfo {
+        country_code: String
+        city: String
+        street: String
+        house: String
     }
 `
 
