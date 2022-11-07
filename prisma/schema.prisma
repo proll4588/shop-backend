@@ -150,7 +150,7 @@ model prices {
   id                                                   Int            @id @unique(map: "id") @default(autoincrement())
   goods_catalog_id                                     Int
   price                                                Decimal        @db.Decimal(10, 2)
-  date                                                 DateTime       @db.DateTime(0)
+  date                                                 DateTime       @default(now()) @db.Timestamp(0)
   discount                                             Decimal?       @db.Decimal(10, 2)
   goods_catalog_goods_catalogToprices_goods_catalog_id goods_catalog  @relation("goods_catalogToprices_goods_catalog_id", fields: [goods_catalog_id], references: [id], onUpdate: Restrict, map: "prices_goods_catalog_id_fk")
   goods_catalog_goods_catalog_price_idToprices         goods_catalog? @relation("goods_catalog_price_idToprices")
