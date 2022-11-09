@@ -175,14 +175,12 @@ model sub_type_goods {
 }
 
 model address {
-  id           Int     @id @unique(map: "id") @default(autoincrement())
-  country_code String  @db.Char(3)
-  city         String  @db.VarChar(100)
-  street       String  @db.VarChar(100)
-  house        String? @db.VarChar(10)
-  users        users[]
-
-  @@index([country_code], map: "address_country_Code_fk")
+  id      Int     @id @unique(map: "id") @default(autoincrement())
+  country String  @db.VarChar(50)
+  city    String  @db.VarChar(100)
+  street  String  @db.VarChar(100)
+  ZIP     Int?
+  users   users[]
 }
 
 model cart {
