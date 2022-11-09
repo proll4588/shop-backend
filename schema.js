@@ -2,6 +2,7 @@ import { gql } from 'apollo-server'
 
 const typeDefs = gql`
     scalar Timestamp
+    scalar date
 
     ##########* Types *###########
 
@@ -194,6 +195,7 @@ const typeDefs = gql`
         login(email: String!, password: String!): Token
         verifyToken: Verify
         user: User
+        userData: User
 
         getFavorite: [Favorite]
     }
@@ -204,7 +206,7 @@ const typeDefs = gql`
         addToFavorite(goodId: Int!): [Favorite]
         removeFavorite(goodId: Int!): [Favorite]
 
-        #updateUserData(userData: UserData): User
+        updateUserData(data: UserData): User
     }
 
     type Token {
@@ -231,6 +233,7 @@ const typeDefs = gql`
 
         email: String!
         phone_number: String
+        date_of_birthday: date
         gender: Int
         address: Address
         photo: String
@@ -238,10 +241,10 @@ const typeDefs = gql`
 
     type Address {
         id: Int!
-        country_code: String
         city: String
         street: String
-        house: String
+        ZIP: Int
+        country: String
     }
 
     input UserData {
@@ -252,16 +255,18 @@ const typeDefs = gql`
     input UserInfo {
         fname: String
         lname: String
+        email: String
         phone_number: String
+        date_of_birthday: date
         gender: Boolean
         photo: String
     }
 
     input AddresInfo {
-        country_code: String
+        country: String
         city: String
         street: String
-        house: String
+        ZIP: Int
     }
 `
 

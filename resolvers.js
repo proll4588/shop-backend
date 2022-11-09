@@ -8,7 +8,7 @@ import {
     removeGoodFromFavorite,
 } from './models/Good/good.js'
 import { getAllGoodsFilters } from './models/Filters/filters.js'
-import { getUserById } from './models/User/user.js'
+import { getUserById, getUserData, updateUserData } from './models/User/user.js'
 import { getGoodCharacteristics } from './models/Characteristics/characteristics.js'
 
 /*========================/ Controles /=============================*/
@@ -64,6 +64,16 @@ const qUser = async (context) => {
     const { userId } = context
     return await getUserById(userId)
 }
+const qUserUpdate = async (context, data) => {
+    checkUserAuth(context)
+    const { userId } = context
+    return await updateUserData(userId, data)
+}
+const qUserData = async (context) => {
+    checkUserAuth(context)
+    const { userId } = context
+    return await getUserData(userId)
+}
 /* ======= */
 
 /* Characteristics */
@@ -103,6 +113,7 @@ const resolvers = {
 
         /* User */
         user: async (_, __, context) => await qUser(context),
+        userData: async (_, __, context) => await qUserData(context),
         /* ======= */
 
         /* Characteristics */
@@ -122,7 +133,11 @@ const resolvers = {
         registration: async (_, { email, password }) =>
             await qRegistrate(email, password),
         /* ======= */
-        //
+
+        /* User */
+        updateUserData: async (_, { data }, context) =>
+            await qUserUpdate(context, data),
+        /* ======= */
 
         // updateUserData: async (_, { userData }, context) =>
         //     checkUserAuth(context) && qUpdateUserData(context, userData),
