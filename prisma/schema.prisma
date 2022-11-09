@@ -176,9 +176,9 @@ model sub_type_goods {
 
 model address {
   id      Int     @id @unique(map: "id") @default(autoincrement())
-  country String  @db.VarChar(50)
-  city    String  @db.VarChar(100)
-  street  String  @db.VarChar(100)
+  country String? @db.VarChar(50)
+  city    String? @db.VarChar(100)
+  street  String? @db.VarChar(100)
   ZIP     Int?
   users   users[]
 }
