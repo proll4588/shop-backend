@@ -109,10 +109,21 @@ export const getTypes = async () => {
 
 /* Получение всех избранных товаров пользователя */
 export const getFavoriteGoods = async (userId) => {
-    return await prisma.favorite_goods.findMany({
+    // return await prisma.favorite_goods.findMany({
+    //     where: {
+    //         users_id: userId,
+    //     },
+    // })
+
+    return await prisma.goods_catalog.findMany({
         where: {
-            users_id: userId,
+            favorite_goods: {
+                some: {
+                    users_id: userId,
+                },
+            },
         },
+        select: goodSelect,
     })
 }
 

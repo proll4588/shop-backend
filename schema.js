@@ -197,7 +197,7 @@ const typeDefs = gql`
         user: User
         userData: User
 
-        getFavorite: [Favorite]
+        getFavorite: [Good]
     }
 
     type Mutation {

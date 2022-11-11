@@ -10,6 +10,7 @@ import {
 import { getAllGoodsFilters } from './models/Filters/filters.js'
 import { getUserById, getUserData, updateUserData } from './models/User/user.js'
 import { getGoodCharacteristics } from './models/Characteristics/characteristics.js'
+import { throwNewGQLError } from './GraphQLError.js'
 
 /*========================/ Controles /=============================*/
 
@@ -98,8 +99,7 @@ const resolvers = {
         filteredGoods: async (_, { filters, subId }) =>
             qFilteredGoods(filters, subId),
 
-        getFavorite: async (_, __, context) =>
-            checkUserAuth(context) && (await qGetFavorite(context)),
+        getFavorite: async (_, __, context) => await qGetFavorite(context),
         /* ======= */
 
         /* Filters */
