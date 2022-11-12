@@ -3,6 +3,7 @@ import { gql } from 'apollo-server'
 const typeDefs = gql`
     scalar Timestamp
     scalar date
+    scalar Upload
 
     ##########* Types *###########
 
@@ -207,6 +208,13 @@ const typeDefs = gql`
         removeFavorite(goodId: Int!): [Favorite]
 
         updateUserData(data: UserData): User
+
+        #uploadFile(file: Upload!): File!
+        uploadUserPhoto(file: Upload!): User
+    }
+
+    type File {
+        url: String!
     }
 
     type Token {

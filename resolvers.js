@@ -1,3 +1,4 @@
+import GraphQLUpload from 'graphql-upload/GraphQLUpload.mjs'
 import { checkUserAuth, login, registrate, VerifyToken } from './auth.js'
 import {
     addGoodToFavorite,
@@ -8,9 +9,15 @@ import {
     removeGoodFromFavorite,
 } from './models/Good/good.js'
 import { getAllGoodsFilters } from './models/Filters/filters.js'
-import { getUserById, getUserData, updateUserData } from './models/User/user.js'
+import {
+    getUserById,
+    getUserData,
+    setUserPhoto,
+    updateUserData,
+} from './models/User/user.js'
 import { getGoodCharacteristics } from './models/Characteristics/characteristics.js'
 import { throwNewGQLError } from './GraphQLError.js'
+import { savePhoto } from './photo.js'
 
 /*========================/ Controles /=============================*/
 
@@ -82,10 +89,33 @@ const qGoodCharacteristics = async (goodId) =>
     await getGoodCharacteristics(goodId)
 /* ======= */
 
+/* Uploads */
+const qUploadUserPhoto = async (file, context) => {
+    checkUserAuth(context)
+    const { userId } = context
+    const photoPath = await savePhoto(file, 'usersPhoto')
+    return await setUserPhoto(userId, photoPath)
+}
+/* ======= */
+
 /*==================================================================*/
+
+// const qUploadFile = async (file) => {
+//     const { createReadStream, filename, mimetype, encoding } = await file
+
+//     const stream = createReadStream()
+//     const pathname = path.join(__dirname, `/public/images/${filename}`)
+
+//     const out = fs.createWriteStream(pathname)
+//     stream.pipe(out)
+//     await finished(out)
+
+//     return { url: `http://localhost:4000/images/${filename}` }
+// }
 
 // TODO: Реализовать поиск минимальной и максимальной цены
 const resolvers = {
+    Upload: GraphQLUpload,
     // Проверка типа
     FilterData: {
         __resolveType: (obj) => {
@@ -138,6 +168,13 @@ const resolvers = {
         updateUserData: async (_, { data }, context) =>
             await qUserUpdate(context, data),
         /* ======= */
+
+        /* Uploads */
+        uploadUserPhoto: async (_, { file }, context) =>
+            await qUploadUserPhoto(file, context),
+        /* ======= */
+
+        // uploadFile: async (_, { file }) => await qUploadFile(file),
 
         // updateUserData: async (_, { userData }, context) =>
         //     checkUserAuth(context) && qUpdateUserData(context, userData),

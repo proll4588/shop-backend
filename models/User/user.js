@@ -94,3 +94,14 @@ export const updateUserData = async (userId, data) => {
         },
     })
 }
+
+export const setUserPhoto = async (userId, photoPath) => {
+    return await prisma.users.update({
+        where: {
+            id: userId,
+        },
+        data: {
+            photo: photoPath,
+        },
+    })
+}
