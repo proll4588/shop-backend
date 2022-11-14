@@ -45,6 +45,11 @@ export const getGoodsByType = async (typeId) => {
 
 /* Получение товароы заданного типа с заданными фильтрами */
 export const getGoodsByFlters = async (filters, typeId) => {
+    if (!filters)
+        return await prisma.goods_catalog.findMany({
+            where: { sub_type_goods_id: typeId },
+            select: goodSelect,
+        })
     if (filters === null) return []
     return await prisma.goods_catalog.findMany({
         where: {
