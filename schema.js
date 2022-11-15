@@ -199,6 +199,7 @@ const typeDefs = gql`
         userData: User
 
         getFavorite: [Good]
+        getCart: [Cart]
     }
 
     type Mutation {
@@ -206,6 +207,10 @@ const typeDefs = gql`
 
         addToFavorite(goodId: Int!): [Favorite]
         removeFavorite(goodId: Int!): [Favorite]
+
+        addToCart(goodId: Int!, count: Int!): [Cart]
+        removeFromCart(goodId: Int!): [Cart]
+        changeGoodInCart(goodId: Int!, count: Int!): [Cart]
 
         updateUserData(data: UserData): User
 
@@ -275,6 +280,14 @@ const typeDefs = gql`
         city: String
         street: String
         ZIP: Int
+    }
+
+    ##########* Карзина *###########
+
+    type Cart {
+        id: Int!
+        count: Int!
+        goods_catalog: Good
     }
 `
 

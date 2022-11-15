@@ -23,6 +23,14 @@ export const goodSelect = {
     rating: true,
 }
 
+export const cartSelect = {
+    id: true,
+    count: true,
+    goods_catalog: {
+        select: goodSelect,
+    },
+}
+
 /* Получение информации о товаре по его id */
 export const getGoodById = async (goodId) => {
     return await prisma.goods_catalog.findUnique({
@@ -114,12 +122,6 @@ export const getTypes = async () => {
 
 /* Получение всех избранных товаров пользователя */
 export const getFavoriteGoods = async (userId) => {
-    // return await prisma.favorite_goods.findMany({
-    //     where: {
-    //         users_id: userId,
-    //     },
-    // })
-
     return await prisma.goods_catalog.findMany({
         where: {
             favorite_goods: {
@@ -188,5 +190,107 @@ export const removeGoodFromFavorite = async (userId, goodId) => {
         where: {
             users_id: userId,
         },
+    })
+}
+
+/* Получение товароы в корзине */
+export const getGoodsInCart = async (userId) => {
+    return await prisma.cart.findMany({
+        where: {
+            users_id: userId,
+        },
+        select: cartSelect,
+    })
+}
+
+/* Добавление товара в корзину пользователя */
+export const addGoodToCart = async (userId, goodId, count) => {
+    /* Проверяем наличие данного товара в корзине */
+    const candidat = await prisma.cart.findFirst({
+        where: {
+            users_id: userId,
+            goods_catalog_id: goodId,
+        },
+    })
+
+    /* Если товар в корзине уже есть, то кидаем ошибку */
+    if (candidat) throw 'GOOD_ALREADY_EXIST'
+
+    /* Создаём новую запись в таблице (добаляем товар в карщину) */
+    await prisma.cart.create({
+        data: {
+            users_id: userId,
+            goods_catalog_id: goodId,
+            count: count,
+        },
+    })
+
+    /* Возвращаем список товаров в корзине */
+    return await prisma.cart.findMany({
+        where: {
+            users_id: userId,
+        },
+        select: cartSelect,
+    })
+}
+
+/* Удаление товара из карзины пользователя */
+export const removeGoodFromCart = async (userId, goodId) => {
+    /* Находим нужную запись для удаления */
+    const candidat = await prisma.cart.findFirst({
+        where: {
+            users_id: userId,
+            goods_catalog_id: goodId,
+        },
+    })
+
+    /* Проверяем наёдена ли запись */
+    if (!candidat) throw 'GOOD_NOT_FOUND'
+
+    /* Удяляем запись */
+    await prisma.cart.delete({
+        where: {
+            id: candidat.id,
+        },
+    })
+
+    /* Возвращаем новый список товаров корзины */
+    return await prisma.cart.findMany({
+        where: {
+            users_id: userId,
+        },
+        select: cartSelect,
+    })
+}
+
+/* Изменение кол-во товара к карзине */
+export const changeGoodCountInCart = async (userId, goodId, count) => {
+    /* Находим запись для изменения */
+    const candidat = await prisma.cart.findFirst({
+        where: {
+            users_id: userId,
+            goods_catalog_id: goodId,
+        },
+    })
+
+    /* Проверяем наличие записи */
+    if (!candidat) throw 'GOOD_NOT_FOUND'
+
+    /* Обновляем запись */
+    await prisma.cart.update({
+        where: {
+            id: candidat.id,
+        },
+        data: {
+            count: count,
+        },
+    })
+
+    /* Возвращаем обновлённый список товаров корзины */
+    return await prisma.cart.findMany({
+        where: {
+            users_id: userId,
+        },
+        select: cartSelect,
     })
 }

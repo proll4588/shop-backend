@@ -1,11 +1,15 @@
 import GraphQLUpload from 'graphql-upload/GraphQLUpload.mjs'
 import { checkUserAuth, login, registrate, VerifyToken } from './auth.js'
 import {
+    addGoodToCart,
     addGoodToFavorite,
+    changeGoodCountInCart,
     getFavoriteGoods,
     getGoodById,
     getGoodsByFlters,
+    getGoodsInCart,
     getTypes,
+    removeGoodFromCart,
     removeGoodFromFavorite,
 } from './models/Good/good.js'
 import { getAllGoodsFilters } from './models/Filters/filters.js'
@@ -49,6 +53,38 @@ const qRemoveFromFavorite = async (context, goodId) => {
     const { userId } = context
     try {
         return await removeGoodFromFavorite(userId, goodId)
+    } catch (e) {
+        throwNewGQLError(e)
+    }
+}
+const qGetGoodsInCart = async (context) => {
+    checkUserAuth(context)
+    const { userId } = context
+    return await getGoodsInCart(userId)
+}
+const qAddGoodToCart = async (context, goodId, count) => {
+    checkUserAuth(context)
+    const { userId } = context
+    try {
+        return await addGoodToCart(userId, goodId, count)
+    } catch (e) {
+        throwNewGQLError(e)
+    }
+}
+const qRemoveGoodFromCart = async (context, goodId) => {
+    checkUserAuth(context)
+    const { userId } = context
+    try {
+        return await removeGoodFromCart(userId, goodId)
+    } catch (e) {
+        throwNewGQLError(e)
+    }
+}
+const qChangeGoodCountInCart = async (context, goodId, count) => {
+    checkUserAuth(context)
+    const { userId } = context
+    try {
+        return await changeGoodCountInCart(userId, goodId, count)
     } catch (e) {
         throwNewGQLError(e)
     }
@@ -130,6 +166,8 @@ const resolvers = {
             qFilteredGoods(filters, subId),
 
         getFavorite: async (_, __, context) => await qGetFavorite(context),
+
+        getCart: async (_, __, context) => await qGetGoodsInCart(context),
         /* ======= */
 
         /* Filters */
@@ -157,6 +195,13 @@ const resolvers = {
             qAddToFavorite(context, goodId),
         removeFavorite: async (_, { goodId }, context) =>
             qRemoveFromFavorite(context, goodId),
+
+        addToCart: async (_, { goodId, count }, context) =>
+            await qAddGoodToCart(context, goodId, count),
+        removeFromCart: async (_, { goodId }, context) =>
+            await qRemoveGoodFromCart(context, goodId),
+        changeGoodInCart: async (_, { goodId, count }, context) =>
+            await qChangeGoodCountInCart(context, goodId, count),
         /* ======= */
 
         /* Auth */
