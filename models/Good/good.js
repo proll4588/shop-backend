@@ -294,3 +294,21 @@ export const changeGoodCountInCart = async (userId, goodId, count) => {
         select: cartSelect,
     })
 }
+
+/* Подсчёт кол-ва избранных товаров */
+export const getFavoriteCount = async (userId) => {
+    return await prisma.favorite_goods.count({
+        where: {
+            users_id: userId,
+        },
+    })
+}
+
+/* Подсчёт кол-ва товаров в карзине */
+export const getCartCount = async (userId) => {
+    return await prisma.cart.count({
+        where: {
+            users_id: userId,
+        },
+    })
+}

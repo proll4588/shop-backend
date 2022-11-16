@@ -200,6 +200,9 @@ const typeDefs = gql`
 
         getFavorite: [Good]
         getCart: [Cart]
+
+        getFavoriteCount: Int
+        getCartCount: Int
     }
 
     type Mutation {

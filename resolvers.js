@@ -4,6 +4,8 @@ import {
     addGoodToCart,
     addGoodToFavorite,
     changeGoodCountInCart,
+    getCartCount,
+    getFavoriteCount,
     getFavoriteGoods,
     getGoodById,
     getGoodsByFlters,
@@ -89,6 +91,16 @@ const qChangeGoodCountInCart = async (context, goodId, count) => {
         throwNewGQLError(e)
     }
 }
+const qGetFavoriteCount = async (context) => {
+    checkUserAuth(context)
+    const { userId } = context
+    return await getFavoriteCount(userId)
+}
+const qGetCartCount = async (context) => {
+    checkUserAuth(context)
+    const { userId } = context
+    return await getCartCount(userId)
+}
 /* ================================================= */
 
 /* Filters */
@@ -166,8 +178,11 @@ const resolvers = {
             qFilteredGoods(filters, subId),
 
         getFavorite: async (_, __, context) => await qGetFavorite(context),
-
         getCart: async (_, __, context) => await qGetGoodsInCart(context),
+
+        getFavoriteCount: async (_, __, context) =>
+            await qGetFavoriteCount(context),
+        getCartCount: async (_, __, context) => await qGetCartCount(context),
         /* ======= */
 
         /* Filters */
