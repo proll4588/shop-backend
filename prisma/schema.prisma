@@ -97,6 +97,7 @@ model goods_catalog {
   main_photo                 goods_photo?                 @relation("goods_catalog_main_photo_idTogoods_photo", fields: [main_photo_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "goods_catalog_goods_photo_id_fk")
   current_price              prices?                      @relation("goods_catalog_price_idToprices", fields: [price_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "goods_catalog_prices_null_fk")
   sub_type_goods             sub_type_goods               @relation(fields: [sub_type_goods_id], references: [id], onUpdate: Restrict, map: "goods_catalog_sub_type_goods_id_fk")
+  avg_rating                 avg_rating?
   cart                       cart[]
   characteristics_for_choice characteristics_for_choice[]
   favorite_goods             favorite_goods[]
@@ -214,8 +215,10 @@ model rating {
   text             String?       @db.VarChar(1000)
   date             DateTime      @db.Date
   goods_catalog    goods_catalog @relation(fields: [goods_catalog_id], references: [id], onUpdate: Restrict, map: "rating_goods_catalog_id_fk")
+  users            users         @relation(fields: [users_id], references: [id], onUpdate: Restrict, map: "rating_users_id_fk")
 
   @@index([goods_catalog_id], map: "rating_goods_catalog_id_fk")
+  @@index([users_id], map: "rating_users_id_fk")
 }
 
 model users {
@@ -232,6 +235,15 @@ model users {
   address          address?         @relation(fields: [address_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "users_address_id_fk")
   cart             cart[]
   favorite_goods   favorite_goods[]
+  rating           rating[]
 
   @@index([address_id], map: "users_address_id_fk")
+}
+
+model avg_rating {
+  id               Int           @id @unique(map: "id") @default(autoincrement())
+  goods_catalog_id Int           @unique(map: "goods_catalog_id")
+  count            Int           @default(0)
+  avg              Decimal       @default(0.00) @db.Decimal(10, 2)
+  goods_catalog    goods_catalog @relation(fields: [goods_catalog_id], references: [id], onUpdate: Restrict, map: "avg_rating_goods_catalog_id_fk")
 }

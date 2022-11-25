@@ -4,15 +4,19 @@ import {
     addGoodToCart,
     addGoodToFavorite,
     changeGoodCountInCart,
+    createGoodRating,
+    deleteGoodRating,
     getCartCount,
     getFavoriteCount,
     getFavoriteGoods,
     getGoodById,
+    getGoodRating,
     getGoodsByFlters,
     getGoodsInCart,
     getTypes,
     removeGoodFromCart,
     removeGoodFromFavorite,
+    updateGoodRating,
 } from './models/Good/good.js'
 import { getAllGoodsFilters } from './models/Filters/filters.js'
 import {
@@ -34,6 +38,8 @@ const qTypes = async () => await getTypes()
 const qGood = async (goodId) => await getGoodById(goodId)
 const qFilteredGoods = async (filters, subId) =>
     await getGoodsByFlters(filters, subId)
+
+const qRating = async (goodId) => await getGoodRating(goodId)
 
 // --С авторизацией
 const qGetFavorite = async (context) => {
@@ -100,6 +106,33 @@ const qGetCartCount = async (context) => {
     checkUserAuth(context)
     const { userId } = context
     return await getCartCount(userId)
+}
+const qCreateRating = async (context, goodId, rating, text) => {
+    checkUserAuth(context)
+    const { userId } = context
+    try {
+        return await createGoodRating(userId, goodId, rating, text)
+    } catch (e) {
+        throwNewGQLError(e)
+    }
+}
+const qDeleteRating = async (context, goodId) => {
+    checkUserAuth(context)
+    const { userId } = context
+    try {
+        return await deleteGoodRating(userId, goodId)
+    } catch (e) {
+        throwNewGQLError(e)
+    }
+}
+const qUpdateRating = async (context, goodId, rating, text) => {
+    checkUserAuth(context)
+    const { userId } = context
+    try {
+        return await updateGoodRating(userId, goodId, rating, text)
+    } catch (e) {
+        throwNewGQLError(e)
+    }
 }
 /* ================================================= */
 
@@ -183,6 +216,8 @@ const resolvers = {
         getFavoriteCount: async (_, __, context) =>
             await qGetFavoriteCount(context),
         getCartCount: async (_, __, context) => await qGetCartCount(context),
+
+        getRating: async (_, { goodId }) => await qRating(goodId),
         /* ======= */
 
         /* Filters */
@@ -217,6 +252,13 @@ const resolvers = {
             await qRemoveGoodFromCart(context, goodId),
         changeGoodInCart: async (_, { goodId, count }, context) =>
             await qChangeGoodCountInCart(context, goodId, count),
+
+        createRating: async (_, { goodId, rating, text }, context) =>
+            await qCreateRating(context, goodId, rating, text),
+        deleteGoodRating: async (_, { goodId }, context) =>
+            await qDeleteRating(context, goodId),
+        updateRating: async (_, { goodId, rating, text }, context) =>
+            await qUpdateRating(context, goodId, rating, text),
         /* ======= */
 
         /* Auth */

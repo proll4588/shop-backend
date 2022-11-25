@@ -20,7 +20,12 @@ export const goodSelect = {
     },
     brands: true,
     sub_type_goods: true,
-    rating: true,
+    avg_rating: {
+        select: {
+            count: true,
+            avg: true,
+        },
+    },
 }
 
 export const cartSelect = {
@@ -309,6 +314,119 @@ export const getCartCount = async (userId) => {
     return await prisma.cart.count({
         where: {
             users_id: userId,
+        },
+    })
+}
+
+/* Получение всех отзывов о товаре */
+export const getGoodRating = async (goodId) => {
+    return await prisma.rating.findMany({
+        where: {
+            goods_catalog_id: goodId,
+        },
+        include: {
+            users: {
+                select: {
+                    id: true,
+                    fname: true,
+                    lname: true,
+                    photo: true,
+                },
+            },
+        },
+    })
+}
+
+/* Создание нового отзыва */
+export const createGoodRating = async (userId, goodId, rating, text) => {
+    const candidate = await prisma.rating.findFirst({
+        where: {
+            users_id: userId,
+            goods_catalog_id: goodId,
+        },
+    })
+
+    if (candidate) throw 'GOOD_ALREADY_EXIST'
+
+    const now = new Date()
+    return await prisma.rating.create({
+        data: {
+            date: now,
+            rating: rating,
+            users_id: userId,
+            goods_catalog_id: goodId,
+            text: text,
+        },
+        include: {
+            users: {
+                select: {
+                    id: true,
+                    fname: true,
+                    lname: true,
+                    photo: true,
+                },
+            },
+        },
+    })
+}
+
+/* Удаление отзыва о товаре */
+export const deleteGoodRating = async (userId, goodId) => {
+    const candidat = await prisma.rating.findFirst({
+        where: {
+            users_id: userId,
+            goods_catalog_id: goodId,
+        },
+    })
+
+    if (!candidat) throw 'GOOD_NOT_FOUND'
+
+    return await prisma.rating.delete({
+        where: {
+            id: candidat.id,
+        },
+        include: {
+            users: {
+                select: {
+                    id: true,
+                    fname: true,
+                    lname: true,
+                    photo: true,
+                },
+            },
+        },
+    })
+}
+
+export const updateGoodRating = async (userId, goodId, rating, text) => {
+    const candidate = await prisma.rating.findFirst({
+        where: {
+            users_id: userId,
+            goods_catalog_id: goodId,
+        },
+    })
+
+    if (!candidate) throw 'GOOD_NOT_FOUND'
+
+    const now = new Date()
+    return await prisma.rating.update({
+        where: {
+            id: candidate.id,
+        },
+        data: {
+            date: now,
+            rating: rating,
+            text: text,
+        },
+        include: {
+            users: {
+                select: {
+                    id: true,
+                    fname: true,
+                    lname: true,
+                    photo: true,
+                },
+            },
         },
     })
 }

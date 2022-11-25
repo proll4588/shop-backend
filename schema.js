@@ -70,6 +70,13 @@ const typeDefs = gql`
 
         brands: Brand
         sub_type_goods: SubGoodsType
+
+        avg_rating: AvgRating
+    }
+
+    type AvgRating {
+        count: Int!
+        avg: Float!
     }
 
     # Фото товара
@@ -203,6 +210,8 @@ const typeDefs = gql`
 
         getFavoriteCount: Int
         getCartCount: Int
+
+        getRating(goodId: Int!): [Rating]
     }
 
     type Mutation {
@@ -219,6 +228,10 @@ const typeDefs = gql`
 
         #uploadFile(file: Upload!): File!
         uploadUserPhoto(file: Upload!): User
+
+        createRating(goodId: Int!, rating: Int!, text: String): Rating
+        deleteGoodRating(goodId: Int!): Rating
+        updateRating(goodId: Int!, rating: Int, text: String): Rating
     }
 
     type File {
@@ -237,6 +250,23 @@ const typeDefs = gql`
         id: Int!
         goods_catalog_id: Int!
         users_id: Int!
+    }
+
+    type Rating {
+        id: Int!
+        goods_catalog_id: Int
+        users_id: Int
+        users: UserRating!
+        rating: Int!
+        text: String
+        date: date
+    }
+
+    type UserRating {
+        id: Int!
+        fname: String
+        lname: String
+        photo: String
     }
 
     ##########* Пользователь *###########
