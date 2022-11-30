@@ -105,6 +105,7 @@ model goods_catalog {
   all_photos                 goods_photo[]                @relation("goods_catalogTogoods_photo_goods_catalog_id")
   all_prices                 prices[]                     @relation("goods_catalogToprices_goods_catalog_id")
   rating                     rating[]
+  storage                    storage?
 
   @@index([brand_id], map: "goods_catalog_brands_id_fk")
   @@index([main_photo_id], map: "goods_catalog_goods_photo_id_fk")
@@ -245,5 +246,11 @@ model avg_rating {
   goods_catalog_id Int           @unique(map: "goods_catalog_id")
   count            Int           @default(0)
   avg              Decimal       @default(0.00) @db.Decimal(10, 2)
-  goods_catalog    goods_catalog @relation(fields: [goods_catalog_id], references: [id], onUpdate: Restrict, map: "avg_rating_goods_catalog_id_fk")
+  goods_catalog    goods_catalog @relation(fields: [goods_catalog_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "avg_rating_goods_catalog_id_fk")
+}
+
+model storage {
+  goods_catalog_id Int           @id @unique(map: "goods_catalog_id")
+  count            Int           @default(0)
+  goods_catalog    goods_catalog @relation(fields: [goods_catalog_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "storage_goods_catalog_id_fk")
 }

@@ -26,6 +26,11 @@ export const goodSelect = {
             avg: true,
         },
     },
+    storage: {
+        select: {
+            count: true,
+        },
+    },
 }
 
 export const cartSelect = {

@@ -72,6 +72,11 @@ const typeDefs = gql`
         sub_type_goods: SubGoodsType
 
         avg_rating: AvgRating
+        storage: Storage
+    }
+
+    type Storage {
+        count: Int!
     }
 
     type AvgRating {
