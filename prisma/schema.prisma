@@ -100,12 +100,14 @@ model goods_catalog {
   avg_rating                 avg_rating?
   cart                       cart[]
   characteristics_for_choice characteristics_for_choice[]
+  delivery_info              delivery_info[]
   favorite_goods             favorite_goods[]
   goods_characteristics      goods_characteristics[]
   all_photos                 goods_photo[]                @relation("goods_catalogTogoods_photo_goods_catalog_id")
   all_prices                 prices[]                     @relation("goods_catalogToprices_goods_catalog_id")
   rating                     rating[]
   storage                    storage?
+  supplies_info              supplies_info[]
 
   @@index([brand_id], map: "goods_catalog_brands_id_fk")
   @@index([main_photo_id], map: "goods_catalog_goods_photo_id_fk")
@@ -236,6 +238,7 @@ model users {
   address          address?         @relation(fields: [address_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "users_address_id_fk")
   cart             cart[]
   favorite_goods   favorite_goods[]
+  orders           orders[]
   rating           rating[]
 
   @@index([address_id], map: "users_address_id_fk")
@@ -253,4 +256,103 @@ model storage {
   goods_catalog_id Int           @id @unique(map: "goods_catalog_id")
   count            Int           @default(0)
   goods_catalog    goods_catalog @relation(fields: [goods_catalog_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "storage_goods_catalog_id_fk")
+}
+
+model delivery_info {
+  id               Int           @id @unique(map: "id") @default(autoincrement())
+  orders_id        Int
+  goods_catalog_id Int
+  count            Int
+  goods_catalog    goods_catalog @relation(fields: [goods_catalog_id], references: [id], onUpdate: Restrict, map: "delivery_info_goods_catalog_id_fk")
+  orders           orders        @relation(fields: [orders_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "delivery_info_orders_id_fk")
+
+  @@index([goods_catalog_id], map: "delivery_info_goods_catalog_id_fk")
+  @@index([orders_id], map: "delivery_info_orders_id_fk")
+}
+
+model operation_types {
+  id   Int    @id @unique(map: "id") @default(autoincrement())
+  name String @unique(map: "name") @db.VarChar(50)
+}
+
+model operations {
+  id                 Int       @id @unique(map: "id") @default(autoincrement())
+  operation_types_id Int
+  supplies_id        Int?
+  orders_id          Int?
+  orders             orders?   @relation(fields: [orders_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "operations_orders_id_fk")
+  supplies           supplies? @relation(fields: [supplies_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "operations_supplies_id_fk")
+
+  @@index([orders_id], map: "operations_orders_id_fk")
+  @@index([supplies_id], map: "operations_supplies_id_fk")
+}
+
+model operations_status {
+  id     Int      @id @unique(map: "id") @default(autoincrement())
+  name   String   @unique(map: "name") @db.VarChar(50)
+  orders orders[]
+}
+
+model order_types {
+  id     Int      @id @unique(map: "id") @default(autoincrement())
+  name   String   @unique(map: "name") @db.VarChar(50)
+  orders orders[]
+}
+
+model orders {
+  id                   Int               @id @unique(map: "id") @default(autoincrement())
+  date                 DateTime          @db.Date
+  users_id             Int
+  operations_status_id Int
+  payment_status_id    Int
+  order_types_id       Int
+  operations_status    operations_status @relation(fields: [operations_status_id], references: [id], onUpdate: Restrict, map: "orders_operations_status_id_fk")
+  order_types          order_types       @relation(fields: [order_types_id], references: [id], onUpdate: Restrict, map: "orders_order_types_id_fk")
+  payment_status       payment_status    @relation(fields: [payment_status_id], references: [id], onUpdate: Restrict, map: "orders_payment_status_id_fk")
+  users                users             @relation(fields: [users_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "orders_users_id_fk")
+  delivery_info        delivery_info[]
+  operations           operations[]
+
+  @@index([operations_status_id], map: "orders_operations_status_id_fk")
+  @@index([order_types_id], map: "orders_order_types_id_fk")
+  @@index([payment_status_id], map: "orders_payment_status_id_fk")
+  @@index([users_id], map: "orders_users_id_fk")
+}
+
+model payment_status {
+  id     Int      @id @unique(map: "id") @default(autoincrement())
+  name   String   @unique(map: "name") @db.VarChar(50)
+  orders orders[]
+}
+
+model suppliers {
+  id       Int        @id @unique(map: "id") @default(autoincrement())
+  name     String     @unique(map: "name") @db.VarChar(50)
+  addres   String     @db.VarChar(255)
+  phone    String     @unique(map: "phone") @db.VarChar(12)
+  email    String?    @db.VarChar(100)
+  supplies supplies[]
+}
+
+model supplies {
+  id            Int             @id @unique(map: "id") @default(autoincrement())
+  date          DateTime        @db.Date
+  suppliers_id  Int
+  suppliers     suppliers       @relation(fields: [suppliers_id], references: [id], onUpdate: Restrict, map: "supplies_suppliers_id_fk")
+  operations    operations[]
+  supplies_info supplies_info[]
+
+  @@index([suppliers_id], map: "supplies_suppliers_id_fk")
+}
+
+model supplies_info {
+  id               Int           @id @unique(map: "id") @default(autoincrement())
+  supplies_id      Int
+  goods_catalog_id Int
+  count            Int
+  goods_catalog    goods_catalog @relation(fields: [goods_catalog_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "supplies_info_goods_catalog_id_fk")
+  supplies         supplies      @relation(fields: [supplies_id], references: [id], onUpdate: Restrict, map: "supplies_info_supplies_id_fk")
+
+  @@index([goods_catalog_id], map: "supplies_info_goods_catalog_id_fk")
+  @@index([supplies_id], map: "supplies_info_supplies_id_fk")
 }
