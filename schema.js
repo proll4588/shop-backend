@@ -217,6 +217,8 @@ const typeDefs = gql`
         getCartCount: Int
 
         getRating(goodId: Int!): [Rating]
+
+        getOrders: [Order]
     }
 
     type Mutation {
@@ -237,6 +239,8 @@ const typeDefs = gql`
         createRating(goodId: Int!, rating: Int!, text: String): Rating
         deleteGoodRating(goodId: Int!): Rating
         updateRating(goodId: Int!, rating: Int, text: String): Rating
+
+        createOrder(payStatus: PayStatus!, orderType: OrderTypes!): Order
     }
 
     type File {
@@ -326,6 +330,33 @@ const typeDefs = gql`
         id: Int!
         count: Int!
         goods_catalog: Good
+    }
+
+    ##########* Заказ *###########
+
+    type Order {
+        id: Int!
+        date: date!
+        operations_status_id: Int!
+        payment_status_id: Int!
+        order_types_id: Int!
+        delivery_info: [DeliveryInfo]
+    }
+
+    type DeliveryInfo {
+        id: Int!
+        goods_catalog: Good!
+        count: Int!
+    }
+
+    enum PayStatus {
+        notPay
+        pay
+    }
+
+    enum OrderTypes {
+        deliver
+        fromShop
     }
 `
 

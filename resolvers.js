@@ -28,6 +28,7 @@ import {
 import { getGoodCharacteristics } from './models/Characteristics/characteristics.js'
 import { throwNewGQLError } from './GraphQLError.js'
 import { savePhoto } from './photo.js'
+import { createOrder, getOrders } from './models/Order/order.js'
 
 /*========================/ Controles /=============================*/
 
@@ -179,20 +180,27 @@ const qUploadUserPhoto = async (file, context) => {
 }
 /* ======= */
 
+/* Order */
+const qCreateOrder = async (context, payStatus, orderType) => {
+    checkUserAuth(context)
+    const { userId } = context
+
+    try {
+        return await createOrder(userId, payStatus, orderType)
+    } catch (e) {
+        throwNewGQLError(e)
+    }
+}
+
+const qGetOrders = async (context) => {
+    checkUserAuth(context)
+    const { userId } = context
+
+    return await getOrders(userId)
+}
+/* ======= */
+
 /*==================================================================*/
-
-// const qUploadFile = async (file) => {
-//     const { createReadStream, filename, mimetype, encoding } = await file
-
-//     const stream = createReadStream()
-//     const pathname = path.join(__dirname, `/public/images/${filename}`)
-
-//     const out = fs.createWriteStream(pathname)
-//     stream.pipe(out)
-//     await finished(out)
-
-//     return { url: `http://localhost:4000/images/${filename}` }
-// }
 
 // TODO: Реализовать поиск минимальной и максимальной цены
 const resolvers = {
@@ -238,6 +246,10 @@ const resolvers = {
         goodCharacteristics: async (_, { goodId }) =>
             qGoodCharacteristics(goodId),
         /* ======= */
+
+        /* Orders */
+        getOrders: async (_, __, context) => await qGetOrders(context),
+        /* ======= */
     },
     Mutation: {
         /* Good */
@@ -276,10 +288,10 @@ const resolvers = {
             await qUploadUserPhoto(file, context),
         /* ======= */
 
-        // uploadFile: async (_, { file }) => await qUploadFile(file),
-
-        // updateUserData: async (_, { userData }, context) =>
-        //     checkUserAuth(context) && qUpdateUserData(context, userData),
+        /* Order */
+        createOrder: async (_, { payStatus, orderType }, context) =>
+            await qCreateOrder(context, payStatus, orderType),
+        /* ======= */
     },
 }
 
