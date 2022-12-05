@@ -263,7 +263,7 @@ model delivery_info {
   orders_id        Int
   goods_catalog_id Int
   count            Int
-  goods_catalog    goods_catalog @relation(fields: [goods_catalog_id], references: [id], onUpdate: Restrict, map: "delivery_info_goods_catalog_id_fk")
+  goods_catalog    goods_catalog @relation(fields: [goods_catalog_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "delivery_info_goods_catalog_id_fk")
   orders           orders        @relation(fields: [orders_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "delivery_info_orders_id_fk")
 
   @@index([goods_catalog_id], map: "delivery_info_goods_catalog_id_fk")
@@ -280,7 +280,7 @@ model operations {
   operation_types_id Int
   supplies_id        Int?
   orders_id          Int?
-  orders             orders?   @relation(fields: [orders_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "operations_orders_id_fk")
+  orders             orders?   @relation(fields: [orders_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "operations_orders_id_fk")
   supplies           supplies? @relation(fields: [supplies_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "operations_supplies_id_fk")
 
   @@index([orders_id], map: "operations_orders_id_fk")
