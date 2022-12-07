@@ -218,7 +218,12 @@ const typeDefs = gql`
 
         getRating(goodId: Int!): [Rating]
 
-        getOrders: [Order]
+        getOrders(
+            skip: Int
+            take: Int
+            operStatus: String
+            search: String
+        ): GetOrders
     }
 
     type Mutation {
@@ -334,6 +339,11 @@ const typeDefs = gql`
 
     ##########* Заказ *###########
 
+    type GetOrders {
+        count: Int!
+        data: [Order]
+    }
+
     type Order {
         id: Int!
         date: date!
@@ -347,6 +357,7 @@ const typeDefs = gql`
         id: Int!
         goods_catalog: Good!
         count: Int!
+        prices: Price
     }
 
     enum PayStatus {

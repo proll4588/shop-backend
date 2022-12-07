@@ -151,13 +151,14 @@ model local_type_goods {
 }
 
 model prices {
-  id                                                   Int            @id @unique(map: "id") @default(autoincrement())
+  id                                                   Int             @id @unique(map: "id") @default(autoincrement())
   goods_catalog_id                                     Int
-  price                                                Decimal        @db.Decimal(10, 2)
-  date                                                 DateTime       @default(now()) @db.Timestamp(0)
-  discount                                             Decimal?       @db.Decimal(10, 2)
-  goods_catalog_goods_catalogToprices_goods_catalog_id goods_catalog  @relation("goods_catalogToprices_goods_catalog_id", fields: [goods_catalog_id], references: [id], onUpdate: Restrict, map: "prices_goods_catalog_id_fk")
-  goods_catalog_goods_catalog_price_idToprices         goods_catalog? @relation("goods_catalog_price_idToprices")
+  price                                                Decimal         @db.Decimal(10, 2)
+  date                                                 DateTime        @default(now()) @db.Timestamp(0)
+  discount                                             Decimal?        @db.Decimal(10, 2)
+  goods_catalog_goods_catalogToprices_goods_catalog_id goods_catalog   @relation("goods_catalogToprices_goods_catalog_id", fields: [goods_catalog_id], references: [id], onUpdate: Restrict, map: "prices_goods_catalog_id_fk")
+  delivery_info                                        delivery_info[]
+  goods_catalog_goods_catalog_price_idToprices         goods_catalog?  @relation("goods_catalog_price_idToprices")
 
   @@index([date, goods_catalog_id], map: "prices_date_goods_catalog_id_index")
   @@index([date, price], map: "prices_date_price_index")
@@ -263,11 +264,14 @@ model delivery_info {
   orders_id        Int
   goods_catalog_id Int
   count            Int
+  prices_id        Int
   goods_catalog    goods_catalog @relation(fields: [goods_catalog_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "delivery_info_goods_catalog_id_fk")
   orders           orders        @relation(fields: [orders_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "delivery_info_orders_id_fk")
+  prices           prices        @relation(fields: [prices_id], references: [id], onUpdate: Restrict, map: "delivery_info_prices_id_fk")
 
   @@index([goods_catalog_id], map: "delivery_info_goods_catalog_id_fk")
   @@index([orders_id], map: "delivery_info_orders_id_fk")
+  @@index([prices_id], map: "delivery_info_prices_id_fk")
 }
 
 model operation_types {

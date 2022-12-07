@@ -192,11 +192,11 @@ const qCreateOrder = async (context, payStatus, orderType) => {
     }
 }
 
-const qGetOrders = async (context) => {
+const qGetOrders = async (context, skip, take, operStatus, search) => {
     checkUserAuth(context)
     const { userId } = context
 
-    return await getOrders(userId)
+    return await getOrders(userId, skip, take, operStatus, search)
 }
 /* ======= */
 
@@ -248,7 +248,8 @@ const resolvers = {
         /* ======= */
 
         /* Orders */
-        getOrders: async (_, __, context) => await qGetOrders(context),
+        getOrders: async (_, { skip, take, operStatus, search }, context) =>
+            await qGetOrders(context, skip, take, operStatus, search),
         /* ======= */
     },
     Mutation: {
