@@ -22,7 +22,7 @@ export const getAllGoodsFilters = async (typeId) => {
     /* Получаем бренды в сыром виде и формируем объект фильтра */
     let brands = await getBrandsByTypeId(typeId)
     const brand = {
-        id: -1,
+        id: -1 * typeId,
         name: 'Производители',
         type: 'list',
         data: {
@@ -38,7 +38,7 @@ export const getAllGoodsFilters = async (typeId) => {
     /* Получаем min и max цену и формируем объект фильтра */
     const priceData = { min: 0, max: 10000, id: -2 }
     const price = {
-        id: -2,
+        id: -2 * typeId,
         name: 'Цена',
         type: 'range',
         data: priceData,
