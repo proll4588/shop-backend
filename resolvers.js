@@ -175,7 +175,7 @@ const qGoodCharacteristics = async (goodId) =>
 const qUploadUserPhoto = async (file, context) => {
     checkUserAuth(context)
     const { userId } = context
-    const photoPath = await savePhoto(file, 'usersPhoto')
+    const photoPath = await savePhoto(file, 'usersPhoto', userId)
     return await setUserPhoto(userId, photoPath)
 }
 /* ======= */
