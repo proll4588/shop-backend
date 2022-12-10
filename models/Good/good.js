@@ -435,3 +435,25 @@ export const updateGoodRating = async (userId, goodId, rating, text) => {
         },
     })
 }
+
+export const getPriceRange = async (typeId) => {
+    const data = await prisma.prices.aggregate({
+        where: {
+            goods_catalog_goods_catalog_price_idToprices: {
+                sub_type_goods_id: typeId,
+            },
+        },
+        _max: {
+            price: true,
+        },
+        _min: {
+            price: true,
+            discount: true,
+        },
+    })
+
+    const max = data._max.price
+    const min = data._min.discount ? data._min.discount : data._min.price
+
+    return { max, min }
+}

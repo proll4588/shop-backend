@@ -1,5 +1,6 @@
 import prisma from '../../controllers/prisma.controller.js'
 import { getBrandsByTypeId } from '../Brand/brand.js'
+import { getPriceRange } from '../Good/good.js'
 
 /* Получение фильтров относящиеся к заданному типу товаров */
 const getTypeFilters = async (typeId) => {
@@ -36,7 +37,8 @@ export const getAllGoodsFilters = async (typeId) => {
 
     // TODO: Хард код!! Написать функцию которая бы находила max и min цену типа товаров
     /* Получаем min и max цену и формируем объект фильтра */
-    const priceData = { min: 0, max: 10000, id: -2 }
+    const maxMin = await getPriceRange(typeId)
+    const priceData = { min: maxMin.min | 0, max: maxMin.max | 0, id: -2 }
     const price = {
         id: -2 * typeId,
         name: 'Цена',
