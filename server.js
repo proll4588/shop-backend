@@ -23,7 +23,7 @@ await server.start()
 
 const app = express()
 app.use(graphqlUploadExpress())
-app.use(express.static('public'))
+app.use('/', express.static('public'))
 server.applyMiddleware({ app })
 await new Promise((r) => app.listen({ port: 4000 }, r))
 
