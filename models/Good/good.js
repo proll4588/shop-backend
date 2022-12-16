@@ -457,3 +457,130 @@ export const getPriceRange = async (typeId) => {
 
     return { max, min }
 }
+
+/* Установка нового главного фото товара */
+export const setMainGoodPhoto = async (goodId, fileName) => {
+    // Находим товар
+    const good = await prisma.goods_catalog.findUnique({
+        where: {
+            id: goodId,
+        },
+    })
+
+    // Если товара нет то до свидания
+    if (!good) throw 'GOOD_NOT_FOUND'
+
+    // Проверяем наличие главного фото
+    let haveMainPhoto = false
+    if (good.main_photo_id) haveMainPhoto = true
+
+    // Если оно есть то удаляем старое
+    if (haveMainPhoto) {
+        // TODO: При удалении фото первращать в null ссылку в таблице
+        // Зануляем фото
+        await prisma.goods_catalog.update({
+            where: {
+                id: goodId,
+            },
+            data: {
+                main_photo_id: null,
+            },
+        })
+
+        // Удаляем фото
+        await prisma.goods_photo.delete({
+            where: {
+                id: good.main_photo_id,
+            },
+        })
+    }
+
+    // Создаём новое фото
+    const newPhoto = await prisma.goods_photo.create({
+        data: {
+            photo: fileName,
+            goods_catalog_id: goodId,
+        },
+    })
+
+    // Задаём ссылку на новое главное фото
+    return await prisma.goods_catalog.update({
+        where: {
+            id: goodId,
+        },
+        select: goodSelect,
+        data: {
+            main_photo_id: newPhoto.id,
+        },
+    })
+}
+
+/* Добавление нового фото товара */
+export const addGoodPhoto = async (goodId, fileName) => {
+    // Проверяем наличие товара
+    const good = await prisma.goods_catalog.findUnique({
+        where: {
+            id: goodId,
+        },
+    })
+
+    // Если такого товара нет то до свидания
+    if (!good) throw 'GOOD_NOT_FOUND'
+
+    // Создаём фото
+    await prisma.goods_photo.create({
+        data: {
+            photo: fileName,
+            goods_catalog_id: goodId,
+        },
+    })
+
+    // Получаем и возвращаем обнавлённый товар
+    return await prisma.goods_catalog.findUnique({
+        where: {
+            id: goodId,
+        },
+        select: goodSelect,
+    })
+}
+
+/* Удалене фото товара */
+export const removeGoodPhoto = async (photoId) => {
+    // Находим кандидата на удаление
+    const candidat = await prisma.goods_photo.findUnique({
+        where: {
+            id: photoId,
+        },
+    })
+
+    // Если его нет то до свидания
+    if (!candidat) throw 'GOOD_NOT_FOUND'
+
+    // Убеждаемся что это фото не главное у товара
+    let good = await prisma.goods_catalog.findFirst({
+        where: {
+            main_photo_id: candidat.id,
+        },
+    })
+
+    // Если всё таки главное то убераем его из главного
+    if (good) {
+        good = await prisma.goods_catalog.update({
+            where: {
+                id: good.id,
+            },
+            data: {
+                main_photo_id: null,
+            },
+        })
+    }
+
+    // Удаляем фото
+    await prisma.goods_photo.delete({
+        where: {
+            id: photoId,
+        },
+    })
+
+    return good
+}

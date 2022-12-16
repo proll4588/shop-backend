@@ -1,6 +1,7 @@
 import GraphQLUpload from 'graphql-upload/GraphQLUpload.mjs'
 import { checkUserAuth, login, registrate, VerifyToken } from './auth.js'
 import {
+    addGoodPhoto,
     addGoodToCart,
     addGoodToFavorite,
     changeGoodCountInCart,
@@ -16,6 +17,8 @@ import {
     getTypes,
     removeGoodFromCart,
     removeGoodFromFavorite,
+    removeGoodPhoto,
+    setMainGoodPhoto,
     updateGoodRating,
 } from './models/Good/good.js'
 import { getAllGoodsFilters } from './models/Filters/filters.js'
@@ -175,9 +178,40 @@ const qGoodCharacteristics = async (goodId) =>
 const qUploadUserPhoto = async (file, context) => {
     checkUserAuth(context)
     const { userId } = context
-    const photoPath = await savePhoto(file, 'usersPhoto', userId)
+    const photoPath = await savePhoto(file, 'usersPhoto')
     return await setUserPhoto(userId, photoPath)
 }
+
+const qUploadMainGoodPhoto = async (file, goodId) => {
+    const photoPath = await savePhoto(file, 'goodsPhoto')
+    try {
+        return await setMainGoodPhoto(goodId, photoPath)
+    } catch (e) {
+        throwNewGQLError(e)
+    }
+}
+const qUploadGoodPhoto = async (file, goodId) => {
+    const photoPath = await savePhoto(file, 'goodsPhoto')
+    try {
+        return await addGoodPhoto(goodId, photoPath)
+    } catch (e) {
+        throwNewGQLError(e)
+    }
+}
+const qRemoveGoodPhoto = async (photoId) => {
+    try {
+        return await removeGoodPhoto(photoId)
+    } catch (e) {
+        throwNewGQLError(e)
+    }
+}
+
+// const qUploadTypePhoto = async (file, context) => {
+//     // checkUserAuth(context)
+//     // const { userId } = context
+//     const photoPath = await savePhoto(file, 'usersPhoto', userId)
+//     return await setUserPhoto(userId, photoPath)
+// }
 /* ======= */
 
 /* Order */
@@ -287,6 +321,12 @@ const resolvers = {
         /* Uploads */
         uploadUserPhoto: async (_, { file }, context) =>
             await qUploadUserPhoto(file, context),
+        uploadMainGoodPhoto: async (_, { file, goodId }) =>
+            await qUploadMainGoodPhoto(file, goodId),
+        uploadGoodPhoto: async (_, { file, goodId }) =>
+            await qUploadGoodPhoto(file, goodId),
+        deleteGoodPhoto: async (_, { photoId }) =>
+            await qRemoveGoodPhoto(photoId),
         /* ======= */
 
         /* Order */

@@ -238,8 +238,15 @@ const typeDefs = gql`
 
         updateUserData(data: UserData): User
 
-        #uploadFile(file: Upload!): File!
+        ####################
         uploadUserPhoto(file: Upload!): User
+
+        uploadMainGoodPhoto(file: Upload!, goodId: Int!): Good
+        uploadGoodPhoto(file: Upload!, goodId: Int!): Good
+        deleteGoodPhoto(photoId: Int!): Good
+
+        #uploadTypePhoto(file: Upload!): User
+        ####################
 
         createRating(goodId: Int!, rating: Int!, text: String): Rating
         deleteGoodRating(goodId: Int!): Rating
