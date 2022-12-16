@@ -38,7 +38,11 @@ export const getAllGoodsFilters = async (typeId) => {
     // TODO: Хард код!! Написать функцию которая бы находила max и min цену типа товаров
     /* Получаем min и max цену и формируем объект фильтра */
     const maxMin = await getPriceRange(typeId)
-    const priceData = { min: maxMin.min | 0, max: maxMin.max | 0, id: -2 }
+    const priceData = {
+        min: maxMin.min | 0,
+        max: maxMin.max | 0,
+        id: -2 * typeId,
+    }
     const price = {
         id: -2 * typeId,
         name: 'Цена',
