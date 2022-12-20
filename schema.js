@@ -201,9 +201,11 @@ const typeDefs = gql`
     type Query {
         types: [GlobalGoodsType]
         good(id: Int!): Good
+        getGoods(search: String, skip: Int, take: Int): [Good]
         filters(subId: Int!): AllFilters
         goodCharacteristics(goodId: Int!): [CharacteristicGroup]
         filteredGoods(subId: Int!, filters: AllFilterState): [Good]
+        getBrands(search: String, skip: Int, take: Int): [Brand]
 
         login(email: String!, password: String!): Token
         verifyToken: Verify

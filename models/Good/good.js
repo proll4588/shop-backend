@@ -1,5 +1,7 @@
 import prisma from '../../controllers/prisma.controller.js'
 
+const isNumeric = (n) => !isNaN(n)
+
 export const goodSelect = {
     id: true,
     name: true,
@@ -436,6 +438,7 @@ export const updateGoodRating = async (userId, goodId, rating, text) => {
     })
 }
 
+/* Получение разброса цены опр типа товароа */
 export const getPriceRange = async (typeId) => {
     const data = await prisma.prices.aggregate({
         where: {
@@ -583,4 +586,46 @@ export const removeGoodPhoto = async (photoId) => {
     })
 
     return good
+}
+
+/* Получение товара по поиску */
+export const getGoods = async (search = '', skip = 0, take = 10) => {
+    const isSearchNum = !!search && isNumeric(search)
+    const id = isSearchNum ? Number(search) : undefined
+    const searchStr = search && search.length ? search : undefined
+
+    return await prisma.goods_catalog.findMany({
+        where: {
+            OR: [
+                { id: id },
+                {
+                    name: {
+                        contains: searchStr,
+                    },
+                },
+            ],
+        },
+        select: goodSelect,
+        skip: skip,
+        take: take,
+    })
+}
+
+/* Получение производителей по поиску */
+export const getBrands = async (search = '', skip = 0, take = 10) => {
+    const name = !!search.length ? search : undefined
+
+    return prisma.brands.findMany({
+        where: {
+            name: {
+                contains: name,
+            },
+        },
+        select: {
+            id: true,
+            name: true,
+        },
+        skip,
+        take,
+    })
 }

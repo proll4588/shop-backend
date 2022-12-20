@@ -7,11 +7,13 @@ import {
     changeGoodCountInCart,
     createGoodRating,
     deleteGoodRating,
+    getBrands,
     getCartCount,
     getFavoriteCount,
     getFavoriteGoods,
     getGoodById,
     getGoodRating,
+    getGoods,
     getGoodsByFlters,
     getGoodsInCart,
     getTypes,
@@ -40,8 +42,12 @@ import { createOrder, getOrders } from './models/Order/order.js'
 // --Без авторизации
 const qTypes = async () => await getTypes()
 const qGood = async (goodId) => await getGoodById(goodId)
+const qGetGoods = async (search, skip, take) =>
+    await getGoods(search, skip, take)
 const qFilteredGoods = async (filters, subId) =>
     await getGoodsByFlters(filters, subId)
+const qGetBrands = async (search, skip, take) =>
+    await getBrands(search, skip, take)
 
 const qRating = async (goodId) => await getGoodRating(goodId)
 
@@ -249,8 +255,12 @@ const resolvers = {
         /* Good */
         types: async () => await qTypes(),
         good: async (_, { id }) => await qGood(id),
+        getGoods: async (_, { search, skip, take }) =>
+            await qGetGoods(search, skip, take),
         filteredGoods: async (_, { filters, subId }) =>
             qFilteredGoods(filters, subId),
+        getBrands: async (_, { search, skip, take }) =>
+            await qGetBrands(search, skip, take),
 
         getFavorite: async (_, __, context) => await qGetFavorite(context),
         getCart: async (_, __, context) => await qGetGoodsInCart(context),
