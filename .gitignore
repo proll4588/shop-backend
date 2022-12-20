@@ -26,3 +26,5 @@ yarn-error.log*
 /.idea
 test.js
 test.json
+
+/public
