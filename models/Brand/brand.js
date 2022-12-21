@@ -12,3 +12,13 @@ export const getBrandsByTypeId = async (typeId) => {
     })
     return ans.map((el) => el.brands)
 }
+
+/* Создание новго производителя */
+export const createBrand = async (name, photo = null) => {
+    return prisma.brands.create({
+        data: {
+            name: name,
+            logo: photo,
+        },
+    })
+}

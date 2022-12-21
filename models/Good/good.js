@@ -629,3 +629,37 @@ export const getBrands = async (search = '', skip = 0, take = 10) => {
         take,
     })
 }
+
+export const getGoodTypesBySearch = async (search) => {
+    return await prisma.sub_type_goods.findMany({
+        where: {
+            name: {
+                contains: search,
+            },
+        },
+        take: 10,
+        skip: 0,
+    })
+}
+
+/* Обновление данных товара */
+export const updateGoodData = async (
+    goodId,
+    name,
+    subTypeId,
+    brandId,
+    description
+) => {
+    return await prisma.goods_catalog.update({
+        where: {
+            id: goodId,
+        },
+        data: {
+            name: name === null ? undefined : name,
+            sub_type_goods_id: subTypeId === null ? undefined : subTypeId,
+            brand_id: brandId === null ? undefined : brandId,
+            description: description === null ? undefined : description,
+        },
+        select: goodSelect,
+    })
+}

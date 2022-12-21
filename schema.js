@@ -206,6 +206,7 @@ const typeDefs = gql`
         goodCharacteristics(goodId: Int!): [CharacteristicGroup]
         filteredGoods(subId: Int!, filters: AllFilterState): [Good]
         getBrands(search: String, skip: Int, take: Int): [Brand]
+        getGoodTypesBySearch(search: String!): [SubGoodsType]
 
         login(email: String!, password: String!): Token
         verifyToken: Verify
@@ -239,6 +240,15 @@ const typeDefs = gql`
         changeGoodInCart(goodId: Int!, count: Int!): [Cart]
 
         updateUserData(data: UserData): User
+        createBrand(name: String!, logo: String): Brand
+
+        updateGoodData(
+            goodId: Int!
+            name: String
+            subTypeId: Int
+            brandId: Int
+            description: String
+        ): Good
 
         ####################
         uploadUserPhoto(file: Upload!): User
@@ -246,6 +256,7 @@ const typeDefs = gql`
         uploadMainGoodPhoto(file: Upload!, goodId: Int!): Good
         uploadGoodPhoto(file: Upload!, goodId: Int!): Good
         deleteGoodPhoto(photoId: Int!): Good
+        uploadLogoForNewBrand(file: Upload!): String
 
         #uploadTypePhoto(file: Upload!): User
         ####################

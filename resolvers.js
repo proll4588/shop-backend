@@ -13,6 +13,7 @@ import {
     getFavoriteGoods,
     getGoodById,
     getGoodRating,
+    getGoodTypesBySearch,
     getGoods,
     getGoodsByFlters,
     getGoodsInCart,
@@ -21,6 +22,7 @@ import {
     removeGoodFromFavorite,
     removeGoodPhoto,
     setMainGoodPhoto,
+    updateGoodData,
     updateGoodRating,
 } from './models/Good/good.js'
 import { getAllGoodsFilters } from './models/Filters/filters.js'
@@ -34,6 +36,7 @@ import { getGoodCharacteristics } from './models/Characteristics/characteristics
 import { throwNewGQLError } from './GraphQLError.js'
 import { savePhoto } from './photo.js'
 import { createOrder, getOrders } from './models/Order/order.js'
+import { createBrand } from './models/Brand/brand.js'
 
 /*========================/ Controles /=============================*/
 
@@ -48,6 +51,18 @@ const qFilteredGoods = async (filters, subId) =>
     await getGoodsByFlters(filters, subId)
 const qGetBrands = async (search, skip, take) =>
     await getBrands(search, skip, take)
+const qcreateBrand = async (name, logo) => await createBrand(name, logo)
+const qGetGoodTypesBySearch = async (search) =>
+    await getGoodTypesBySearch(search)
+const qUpdateGoodData = async (
+    goodId,
+    name,
+    subTypeId,
+    brandId,
+    description
+) => {
+    return await updateGoodData(goodId, name, subTypeId, brandId, description)
+}
 
 const qRating = async (goodId) => await getGoodRating(goodId)
 
@@ -212,6 +227,10 @@ const qRemoveGoodPhoto = async (photoId) => {
     }
 }
 
+const qUploadLogoForNewBrand = async (file) => {
+    return await savePhoto(file, 'brandsLogo')
+}
+
 // const qUploadTypePhoto = async (file, context) => {
 //     // checkUserAuth(context)
 //     // const { userId } = context
@@ -261,6 +280,8 @@ const resolvers = {
             qFilteredGoods(filters, subId),
         getBrands: async (_, { search, skip, take }) =>
             await qGetBrands(search, skip, take),
+        getGoodTypesBySearch: async (_, { search }) =>
+            qGetGoodTypesBySearch(search),
 
         getFavorite: async (_, __, context) => await qGetFavorite(context),
         getCart: async (_, __, context) => await qGetGoodsInCart(context),
@@ -316,6 +337,19 @@ const resolvers = {
             await qDeleteRating(context, goodId),
         updateRating: async (_, { goodId, rating, text }, context) =>
             await qUpdateRating(context, goodId, rating, text),
+        createBrand: async (_, { name, logo }) =>
+            await qcreateBrand(name, logo),
+        updateGoodData: async (
+            _,
+            { goodId, name, subTypeId, brandId, description }
+        ) =>
+            await qUpdateGoodData(
+                goodId,
+                name,
+                subTypeId,
+                brandId,
+                description
+            ),
         /* ======= */
 
         /* Auth */
@@ -337,6 +371,8 @@ const resolvers = {
             await qUploadGoodPhoto(file, goodId),
         deleteGoodPhoto: async (_, { photoId }) =>
             await qRemoveGoodPhoto(photoId),
+        uploadLogoForNewBrand: async (_, { file }) =>
+            qUploadLogoForNewBrand(file),
         /* ======= */
 
         /* Order */
