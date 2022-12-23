@@ -5,6 +5,7 @@ import {
     addGoodToCart,
     addGoodToFavorite,
     changeGoodCountInCart,
+    changeGoodPrice,
     createGoodRating,
     deleteGoodRating,
     getBrands,
@@ -32,7 +33,13 @@ import {
     setUserPhoto,
     updateUserData,
 } from './models/User/user.js'
-import { getGoodCharacteristics } from './models/Characteristics/characteristics.js'
+import {
+    addCharacteristicToGood,
+    getCharacteristicGroupsByGoodId,
+    getCharacteristicList,
+    getCharacteristicValues,
+    getGoodCharacteristics,
+} from './models/Characteristics/characteristics.js'
 import { throwNewGQLError } from './GraphQLError.js'
 import { savePhoto } from './photo.js'
 import { createOrder, getOrders } from './models/Order/order.js'
@@ -63,6 +70,16 @@ const qUpdateGoodData = async (
 ) => {
     return await updateGoodData(goodId, name, subTypeId, brandId, description)
 }
+const qUpdateGoodPrice = async (goodId, price, discount) =>
+    await changeGoodPrice(goodId, price, discount)
+const qGetCharacteristicGroupsByGoodId = async (goodId, search) =>
+    await getCharacteristicGroupsByGoodId(goodId, search)
+const qGetCharacteristicList = async (groupId, search) =>
+    await getCharacteristicList(groupId, search)
+const qGetCharacteristicValues = async (listId, search) =>
+    await getCharacteristicValues(listId, search)
+const qAddCharacteristicToGood = async (goodId, listId, valueId) =>
+    await addCharacteristicToGood(goodId, listId, valueId)
 
 const qRating = async (goodId) => await getGoodRating(goodId)
 
@@ -282,6 +299,12 @@ const resolvers = {
             await qGetBrands(search, skip, take),
         getGoodTypesBySearch: async (_, { search }) =>
             qGetGoodTypesBySearch(search),
+        getCharacteristicGroupsByGoodId: async (_, { goodId, search }) =>
+            await qGetCharacteristicGroupsByGoodId(goodId, search),
+        getCharacteristicList: async (_, { groupId, search }) =>
+            await qGetCharacteristicList(groupId, search),
+        getCharacteristicValues: async (_, { listId, search }) =>
+            await qGetCharacteristicValues(listId, search),
 
         getFavorite: async (_, __, context) => await qGetFavorite(context),
         getCart: async (_, __, context) => await qGetGoodsInCart(context),
@@ -350,6 +373,10 @@ const resolvers = {
                 brandId,
                 description
             ),
+        updateGoodPrice: async (_, { goodId, price, discount }) =>
+            await qUpdateGoodPrice(goodId, price, discount),
+        addCharacteristicToGood: async (_, { goodId, listId, valueId }) =>
+            await qAddCharacteristicToGood(goodId, listId, valueId),
         /* ======= */
 
         /* Auth */

@@ -10,12 +10,16 @@ export const goodSelect = {
     all_photos: true,
     current_price: {
         select: {
+            id: true,
+            date: true,
             price: true,
             discount: true,
         },
     },
     all_prices: {
         select: {
+            id: true,
+            date: true,
             price: true,
             discount: true,
         },
@@ -661,5 +665,25 @@ export const updateGoodData = async (
             description: description === null ? undefined : description,
         },
         select: goodSelect,
+    })
+}
+
+/* Обновление цены товара */
+export const changeGoodPrice = async (goodId, price, discount) => {
+    const date = new Date()
+
+    return await prisma.prices.create({
+        data: {
+            date,
+            price,
+            discount,
+            goods_catalog_id: goodId,
+        },
+        select: {
+            id: true,
+            date: true,
+            price: true,
+            discount: true,
+        },
     })
 }

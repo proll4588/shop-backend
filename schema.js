@@ -43,6 +43,8 @@ const typeDefs = gql`
 
     # Основные данные цены
     type Price {
+        id: Int
+        date: date
         price: Float
         discount: Float
     }
@@ -183,7 +185,7 @@ const typeDefs = gql`
     type CharacteristicGroup {
         id: Int!
         name: String!
-        items: [CharacteristicItem]!
+        items: [CharacteristicItem]
     }
 
     # элемент группы характеристики
@@ -192,6 +194,23 @@ const typeDefs = gql`
         name: String!
         value: String!
         description: String
+    }
+
+    type CharacteristicList {
+        id: Int!
+        name: String!
+    }
+
+    type CharacteristicValue {
+        id: Int!
+        value: String!
+    }
+
+    type GoodCharacteristic {
+        id: Int!
+        goods_catalog_id: Int!
+        characteristics_list_id: Int!
+        characteristics_params_id: Int!
     }
 
     ########################
@@ -207,6 +226,18 @@ const typeDefs = gql`
         filteredGoods(subId: Int!, filters: AllFilterState): [Good]
         getBrands(search: String, skip: Int, take: Int): [Brand]
         getGoodTypesBySearch(search: String!): [SubGoodsType]
+        getCharacteristicGroupsByGoodId(
+            goodId: Int!
+            search: String
+        ): [CharacteristicGroup]
+        getCharacteristicList(
+            groupId: Int!
+            search: String
+        ): [CharacteristicList]
+        getCharacteristicValues(
+            listId: Int!
+            search: String
+        ): [CharacteristicValue]
 
         login(email: String!, password: String!): Token
         verifyToken: Verify
@@ -249,6 +280,12 @@ const typeDefs = gql`
             brandId: Int
             description: String
         ): Good
+        updateGoodPrice(goodId: Int!, price: Float!, discount: Float): Price
+        addCharacteristicToGood(
+            goodId: Int!
+            listId: Int!
+            valueId: Int!
+        ): GoodCharacteristic
 
         ####################
         uploadUserPhoto(file: Upload!): User
