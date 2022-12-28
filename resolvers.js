@@ -34,7 +34,11 @@ import {
     updateUserData,
 } from './models/User/user.js'
 import {
+    addCharacteristicGroup,
+    addCharacteristicList,
     addCharacteristicToGood,
+    addCharacteristicValue,
+    deleteGoodCharacteristic,
     getCharacteristicGroupsByGoodId,
     getCharacteristicList,
     getCharacteristicValues,
@@ -80,6 +84,15 @@ const qGetCharacteristicValues = async (listId, search) =>
     await getCharacteristicValues(listId, search)
 const qAddCharacteristicToGood = async (goodId, listId, valueId) =>
     await addCharacteristicToGood(goodId, listId, valueId)
+
+const qAddCharacteristicGroup = async (subId, name) =>
+    await addCharacteristicGroup(subId, name)
+const qAddCharacteristicList = async (groupId, name) =>
+    await addCharacteristicList(groupId, name)
+const qAddCharacteristicValue = async (listId, value) =>
+    await addCharacteristicValue(listId, value)
+const qDeleteGoodCharacteristic = async (goodId, itemId) =>
+    await deleteGoodCharacteristic(goodId, itemId)
 
 const qRating = async (goodId) => await getGoodRating(goodId)
 
@@ -353,6 +366,15 @@ const resolvers = {
             await qRemoveGoodFromCart(context, goodId),
         changeGoodInCart: async (_, { goodId, count }, context) =>
             await qChangeGoodCountInCart(context, goodId, count),
+
+        addCharacteristicGroup: async (_, { subId, name }) =>
+            await qAddCharacteristicGroup(subId, name),
+        addCharacteristicList: async (_, { groupId, name }) =>
+            await qAddCharacteristicList(groupId, name),
+        addCharacteristicValue: async (_, { listId, value }) =>
+            await qAddCharacteristicValue(listId, value),
+        deleteGoodCharacteristic: async (_, { goodId, itemId }) =>
+            await qDeleteGoodCharacteristic(goodId, itemId),
 
         createRating: async (_, { goodId, rating, text }, context) =>
             await qCreateRating(context, goodId, rating, text),

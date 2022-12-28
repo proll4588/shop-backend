@@ -287,6 +287,14 @@ const typeDefs = gql`
             valueId: Int!
         ): GoodCharacteristic
 
+        addCharacteristicGroup(subId: Int!, name: String!): CharacteristicGroup
+        addCharacteristicList(groupId: Int!, name: String!): CharacteristicList
+        addCharacteristicValue(
+            listId: Int!
+            value: String!
+        ): CharacteristicValue
+        deleteGoodCharacteristic(goodId: Int!, itemId: Int!): Int
+
         ####################
         uploadUserPhoto(file: Upload!): User
 
