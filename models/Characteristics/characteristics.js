@@ -165,3 +165,14 @@ export const addCharacteristicToGood = async (goodId, listId, valueId) => {
         },
     })
 }
+
+export const deleteGoodCharacteristic = async (goodId, itemId) => {
+    const del = await prisma.goods_characteristics.deleteMany({
+        where: {
+            characteristics_list_id: itemId,
+            goods_catalog_id: goodId,
+        },
+    })
+
+    return del.id
+}
