@@ -6,6 +6,7 @@ import {
     addGoodToFavorite,
     changeGoodCountInCart,
     changeGoodPrice,
+    createGood,
     createGoodRating,
     deleteGoodRating,
     getBrands,
@@ -93,6 +94,7 @@ const qAddCharacteristicValue = async (listId, value) =>
     await addCharacteristicValue(listId, value)
 const qDeleteGoodCharacteristic = async (goodId, itemId) =>
     await deleteGoodCharacteristic(goodId, itemId)
+const qCreateGood = async (subId, name) => await createGood(subId, name)
 
 const qRating = async (goodId) => await getGoodRating(goodId)
 
@@ -399,6 +401,9 @@ const resolvers = {
             await qUpdateGoodPrice(goodId, price, discount),
         addCharacteristicToGood: async (_, { goodId, listId, valueId }) =>
             await qAddCharacteristicToGood(goodId, listId, valueId),
+
+        createGood: async (_, { subId, name }) =>
+            await qCreateGood(subId, name),
         /* ======= */
 
         /* Auth */

@@ -273,6 +273,8 @@ const typeDefs = gql`
         updateUserData(data: UserData): User
         createBrand(name: String!, logo: String): Brand
 
+        createGood(subId: Int!, name: String!): Good
+
         updateGoodData(
             goodId: Int!
             name: String
@@ -319,10 +321,12 @@ const typeDefs = gql`
 
     type Token {
         token: String!
+        isAdmin: Boolean
     }
 
     type Verify {
         verify: Boolean
+        isAdmin: Boolean
     }
 
     type Favorite {

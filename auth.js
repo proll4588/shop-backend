@@ -9,7 +9,8 @@ const secret = process.env.SECRET
 
 // TODO: В отдельный файл
 export const signJWT = (id) => {
-    return jwt.sign({ id }, secret, { expiresIn: '24h' })
+    const isAdmin = id === 11
+    return jwt.sign({ id, isAdmin }, secret, { expiresIn: '24h' })
 }
 
 /*
@@ -22,9 +23,9 @@ export const context = ({ req, res }) => {
 
     try {
         const info = jwt.verify(token, secret)
-        return { verified: true, userId: info.id }
+        return { verified: true, userId: info.id, isAdmin: info.isAdmin }
     } catch (e) {
-        return { verified: false }
+        return { verified: false, isAdmin: false }
     }
 }
 
@@ -48,7 +49,7 @@ export const login = async (email, password) => {
 
     /* Если всё ок, то подписываем токен и отправляем клиенту */
     const token = signJWT(user.id)
-    return { token }
+    return { token, isAdmin: user.id === 11 }
 }
 
 /* Регистрация пользователя */
@@ -69,4 +70,7 @@ export const registrate = async (email, password) => {
 }
 
 /* Проверка валидности токена */
-export const VerifyToken = (context) => ({ verify: context.verified })
+export const VerifyToken = (context) => ({
+    verify: context.verified,
+    isAdmin: context.isAdmin,
+})
