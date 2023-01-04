@@ -2,15 +2,15 @@ import prisma from '../../controllers/prisma.controller.js'
 
 /* Получение производителей заданного типа товаров */
 export const getBrandsByTypeId = async (typeId) => {
-    const ans = await prisma.goods_catalog.findMany({
+    return await prisma.brands.findMany({
         where: {
-            sub_type_goods_id: typeId,
-        },
-        select: {
-            brands: true,
+            goods_catalog: {
+                some: {
+                    sub_type_goods_id: typeId,
+                },
+            },
         },
     })
-    return ans.map((el) => el.brands)
 }
 
 /* Создание новго производителя */

@@ -460,7 +460,9 @@ export const getPriceRange = async (typeId) => {
     })
 
     const max = data._max.price
-    const min = data._min.discount ? data._min.discount : data._min.price
+    const min = data._min.discount
+        ? Math.min(data._min.discount, data._min.price)
+        : data._min.price
 
     return { max, min }
 }
@@ -685,5 +687,15 @@ export const changeGoodPrice = async (goodId, price, discount) => {
             price: true,
             discount: true,
         },
+    })
+}
+
+export const createGood = async (subId, name) => {
+    return await prisma.goods_catalog.create({
+        data: {
+            name,
+            sub_type_goods_id: subId,
+        },
+        select: goodSelect,
     })
 }
