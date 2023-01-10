@@ -258,6 +258,9 @@ const typeDefs = gql`
             operStatus: String
             search: String
         ): GetOrders
+
+        findGlobalType(search: String!): [GlobalGoodsType]
+        findLocalType(search: String!): [LocalGoodsType]
     }
 
     type Mutation {
@@ -313,6 +316,19 @@ const typeDefs = gql`
         updateRating(goodId: Int!, rating: Int, text: String): Rating
 
         createOrder(payStatus: PayStatus!, orderType: OrderTypes!): Order
+
+        updateGlobalType(globalTypeId: Int!, name: String!): GlobalGoodsType
+        updateLocalType(localTypeId: Int!, name: String!): LocalGoodsType
+        updateSubType(subTypeId: Int!, name: String!): SubGoodsType
+        uploadSubPhoto(subTypeId: Int!, file: Upload!): SubGoodsType
+
+        addGlobalType(name: String!): GlobalGoodsType
+        addLocalType(name: String!, globalTypeId: Int!): LocalGoodsType
+        addSubType(name: String!, localTypeId: Int!): SubGoodsType
+
+        deleteGlobalType(globalTypeId: Int!): GlobalGoodsType
+        deleteLocalType(localTypeId: Int!): LocalGoodsType
+        deleteSubType(subTypeId: Int!): SubGoodsType
     }
 
     type File {

@@ -699,3 +699,112 @@ export const createGood = async (subId, name) => {
         select: goodSelect,
     })
 }
+
+export const updateGlobalType = async (typeId, name) => {
+    return await prisma.global_type_goods.update({
+        where: {
+            id: typeId,
+        },
+        data: {
+            name,
+        },
+        include: {
+            local_type_goods: {
+                include: {
+                    sub_type_goods: true,
+                },
+            },
+        },
+    })
+}
+
+export const updateLocalType = async (typeId, name) => {
+    return await prisma.local_type_goods.update({
+        where: {
+            id: typeId,
+        },
+        data: {
+            name,
+        },
+        include: {
+            sub_type_goods: true,
+        },
+    })
+}
+
+export const updateSubType = async (typeId, name) => {
+    return await prisma.sub_type_goods.update({
+        where: {
+            id: typeId,
+        },
+        data: {
+            name,
+        },
+    })
+}
+
+export const updateSubTypePhoto = async (typeId, path) => {
+    return await prisma.sub_type_goods.update({
+        where: {
+            id: typeId,
+        },
+        data: {
+            photo: path,
+        },
+    })
+}
+
+export const addGlobalType = async (name) => {
+    await prisma.global_type_goods.create({
+        data: {
+            name,
+        },
+    })
+}
+
+export const addLocalType = async (name, globalTypeId) => {
+    await prisma.local_type_goods.create({
+        data: {
+            name,
+            global_type_goods_id: globalTypeId,
+        },
+    })
+}
+
+export const addSubType = async (name, localTypeId) => {
+    await prisma.sub_type_goods.create({
+        data: {
+            name,
+            local_type_goods_id: localTypeId,
+        },
+    })
+}
+
+export const findGlobalTypes = async (search) => {
+    return await prisma.global_type_goods.findMany({
+        where: {
+            name: {
+                contains: search,
+            },
+        },
+    })
+}
+
+export const findLocalTypes = async (search) => {
+    return await prisma.local_type_goods.findMany({
+        where: {
+            name: {
+                contains: search,
+            },
+        },
+    })
+}
+
+export const deleteGlobalType = async (globalTypeId) =>
+    await prisma.global_type_goods.delete({ where: { id: globalTypeId } })
+
+export const deleteLocalType = async (localTypeId) =>
+    await prisma.local_type_goods.delete({ where: { id: localTypeId } })
+
+export const deleteSubType = async (subTypeId) =>
+    await prisma.sub_type_goods.delete({ where: { id: subTypeId } })

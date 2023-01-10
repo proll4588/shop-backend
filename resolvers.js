@@ -1,14 +1,22 @@
 import GraphQLUpload from 'graphql-upload/GraphQLUpload.mjs'
 import { checkUserAuth, login, registrate, VerifyToken } from './auth.js'
 import {
+    addGlobalType,
     addGoodPhoto,
     addGoodToCart,
     addGoodToFavorite,
+    addLocalType,
+    addSubType,
     changeGoodCountInCart,
     changeGoodPrice,
     createGood,
     createGoodRating,
+    deleteGlobalType,
     deleteGoodRating,
+    deleteLocalType,
+    deleteSubType,
+    findGlobalTypes,
+    findLocalTypes,
     getBrands,
     getCartCount,
     getFavoriteCount,
@@ -24,8 +32,12 @@ import {
     removeGoodFromFavorite,
     removeGoodPhoto,
     setMainGoodPhoto,
+    updateGlobalType,
     updateGoodData,
     updateGoodRating,
+    updateLocalType,
+    updateSubType,
+    updateSubTypePhoto,
 } from './models/Good/good.js'
 import { getAllGoodsFilters } from './models/Filters/filters.js'
 import {
@@ -97,6 +109,31 @@ const qDeleteGoodCharacteristic = async (goodId, itemId) =>
 const qCreateGood = async (subId, name) => await createGood(subId, name)
 
 const qRating = async (goodId) => await getGoodRating(goodId)
+
+const qUpdateGlobalType = async (typeId, name) =>
+    await updateGlobalType(typeId, name)
+const qUpdateLocalType = async (typeId, name) =>
+    await updateLocalType(typeId, name)
+const qUpdateSubType = async (typeId, name) => await updateSubType(typeId, name)
+const qUpdateSubTypePhoto = async (typeId, file) => {
+    const photoPath = await savePhoto(file, 'typePhoto')
+    return await updateSubTypePhoto(typeId, photoPath)
+}
+
+const qAddGlobalType = async (name) => await addGlobalType(name)
+const qAddLocalType = async (name, globalTypeId) =>
+    await addLocalType(name, globalTypeId)
+const qAddSubType = async (name, localTypeId) =>
+    await addSubType(name, localTypeId)
+
+const qFindGlobalTypes = async (search) => await findGlobalTypes(search)
+const qFindLocalTypes = async (search) => await findLocalTypes(search)
+
+const qDeleteGlobalType = async (globalTypeId) =>
+    await deleteGlobalType(globalTypeId)
+const qDeleteLocalType = async (globalTypeId) =>
+    await deleteLocalType(globalTypeId)
+const qDeleteSubType = async (globalTypeId) => await deleteSubType(globalTypeId)
 
 // --С авторизацией
 const qGetFavorite = async (context) => {
@@ -329,6 +366,9 @@ const resolvers = {
         getCartCount: async (_, __, context) => await qGetCartCount(context),
 
         getRating: async (_, { goodId }) => await qRating(goodId),
+
+        findGlobalType: async (_, { search }) => await qFindGlobalTypes(search),
+        findLocalType: async (_, { search }) => await qFindLocalTypes(search),
         /* ======= */
 
         /* Filters */
@@ -404,6 +444,28 @@ const resolvers = {
 
         createGood: async (_, { subId, name }) =>
             await qCreateGood(subId, name),
+
+        updateGlobalType: async (_, { globalTypeId, name }) =>
+            await qUpdateGlobalType(globalTypeId, name),
+        updateLocalType: async (_, { localTypeId, name }) =>
+            await qUpdateLocalType(localTypeId, name),
+        updateSubType: async (_, { subTypeId, name }) =>
+            await qUpdateSubType(subTypeId, name),
+        uploadSubPhoto: async (_, { subTypeId, file }) =>
+            await qUpdateSubTypePhoto(subTypeId, file),
+
+        addGlobalType: async (_, { name }) => await qAddGlobalType(name),
+        addLocalType: async (_, { name, globalTypeId }) =>
+            await qAddLocalType(name, globalTypeId),
+        addSubType: async (_, { name, localTypeId }) =>
+            await qAddSubType(name, localTypeId),
+
+        deleteGlobalType: async (_, { globalTypeId }) =>
+            await qDeleteGlobalType(globalTypeId),
+        deleteLocalType: async (_, { localTypeId }) =>
+            await qDeleteLocalType(localTypeId),
+        deleteSubType: async (_, { subTypeId }) =>
+            await qDeleteSubType(subTypeId),
         /* ======= */
 
         /* Auth */
