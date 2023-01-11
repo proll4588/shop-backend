@@ -71,8 +71,8 @@ const qTypes = async () => await getTypes()
 const qGood = async (goodId) => await getGoodById(goodId)
 const qGetGoods = async (search, skip, take) =>
     await getGoods(search, skip, take)
-const qFilteredGoods = async (filters, subId) =>
-    await getGoodsByFlters(filters, subId)
+const qFilteredGoods = async (filters, subId, skip, take, sort) =>
+    await getGoodsByFlters(filters, subId, skip, take, sort)
 const qGetBrands = async (search, skip, take) =>
     await getBrands(search, skip, take)
 const qcreateBrand = async (name, logo) => await createBrand(name, logo)
@@ -345,8 +345,8 @@ const resolvers = {
         good: async (_, { id }) => await qGood(id),
         getGoods: async (_, { search, skip, take }) =>
             await qGetGoods(search, skip, take),
-        filteredGoods: async (_, { filters, subId }) =>
-            qFilteredGoods(filters, subId),
+        filteredGoods: async (_, { filters, subId, skip, take, sort }) =>
+            qFilteredGoods(filters, subId, skip, take, sort),
         getBrands: async (_, { search, skip, take }) =>
             await qGetBrands(search, skip, take),
         getGoodTypesBySearch: async (_, { search }) =>

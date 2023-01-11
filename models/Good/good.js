@@ -47,6 +47,52 @@ export const cartSelect = {
     },
 }
 
+export const filteredSearch = (filters, typeId) => {
+    return {
+        /* Поиск по параметрам типа */
+        AND: [
+            ...filters.typeFilters.map((filter) => {
+                if (filter.state.length === 0) return
+                return {
+                    goods_characteristics: {
+                        some: {
+                            OR: filter.state.map((state) => ({
+                                characteristics_params_id: state,
+                            })),
+                        },
+                    },
+                }
+            }),
+
+            /* Поиск по произвадителю */
+            {
+                OR: filters.generalFilters.brand.map((brand) => ({
+                    brand_id: brand,
+                })),
+            },
+
+            /* Поиск по типу */
+            { sub_type_goods_id: typeId },
+
+            /* Поиск по цене */
+            {
+                OR: {
+                    current_price: {
+                        price: {
+                            gte: filters.generalFilters.price.min
+                                ? filters.generalFilters.price.min
+                                : undefined,
+                            lte: filters.generalFilters.price.max
+                                ? filters.generalFilters.price.max
+                                : undefined,
+                        },
+                    },
+                },
+            },
+        ],
+    }
+}
+
 /* Получение информации о товаре по его id */
 export const getGoodById = async (goodId) => {
     return await prisma.goods_catalog.findUnique({
@@ -68,59 +114,59 @@ export const getGoodsByType = async (typeId) => {
 }
 
 /* Получение товароы заданного типа с заданными фильтрами */
-export const getGoodsByFlters = async (filters, typeId) => {
+export const getGoodsByFlters = async (
+    filters,
+    typeId,
+    skip = 0,
+    take = 10,
+    sort = 0
+) => {
+    let goods
     if (!filters)
-        return await prisma.goods_catalog.findMany({
+        goods = await prisma.goods_catalog.findMany({
             where: { sub_type_goods_id: typeId },
+            orderBy: {
+                current_price: {
+                    price: sort === 0 || sort === 1 ? 'asc' : 'desc',
+                },
+            },
             select: goodSelect,
+            skip,
+            take,
         })
-    if (filters === null) return []
-    return await prisma.goods_catalog.findMany({
-        where: {
-            /* Поиск по параметрам типа */
-            AND: [
-                ...filters.typeFilters.map((filter) => {
-                    if (filter.state.length === 0) return
-                    return {
-                        goods_characteristics: {
-                            some: {
-                                OR: filter.state.map((state) => ({
-                                    characteristics_params_id: state,
-                                })),
-                            },
-                        },
-                    }
-                }),
-
-                /* Поиск по произвадителю */
-                {
-                    OR: filters.generalFilters.brand.map((brand) => ({
-                        brand_id: brand,
-                    })),
+    else {
+        if (filters === null) return { goods: [], totalCount: 0 }
+        goods = await prisma.goods_catalog.findMany({
+            where: filteredSearch(filters, typeId),
+            orderBy: {
+                current_price: {
+                    price: sort === 0 || sort === 1 ? 'asc' : 'desc',
                 },
+            },
+            select: goodSelect,
+            skip,
+            take,
+        })
+    }
 
-                /* Поиск по типу */
-                { sub_type_goods_id: typeId },
+    return { goods, totalCount: countGoodsByFlters(filters, typeId) }
+}
 
-                /* Поиск по цене */
-                {
-                    OR: {
-                        current_price: {
-                            price: {
-                                gte: filters.generalFilters.price.min
-                                    ? filters.generalFilters.price.min
-                                    : undefined,
-                                lte: filters.generalFilters.price.max
-                                    ? filters.generalFilters.price.max
-                                    : undefined,
-                            },
-                        },
-                    },
-                },
-            ],
-        },
-        select: goodSelect,
-    })
+export const countGoodsByFlters = async (filters, typeId) => {
+    let data
+    if (filters === null) return 0
+    if (!filters)
+        data = await prisma.goods_catalog.aggregate({
+            where: { sub_type_goods_id: typeId },
+            _count: true,
+        })
+    else
+        data = await prisma.goods_catalog.aggregate({
+            where: filteredSearch(filters, typeId),
+            _count: true,
+        })
+
+    return data._count
 }
 
 /* Получение всей иерархии типов товаров */

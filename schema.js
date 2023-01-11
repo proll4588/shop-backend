@@ -215,6 +215,11 @@ const typeDefs = gql`
 
     ########################
 
+    type FilteredGoodsFetch {
+        totalCount: Int!
+        goods: [Good]
+    }
+
     ##########* Запросы *###########
 
     type Query {
@@ -223,7 +228,13 @@ const typeDefs = gql`
         getGoods(search: String, skip: Int, take: Int): [Good]
         filters(subId: Int!): AllFilters
         goodCharacteristics(goodId: Int!): [CharacteristicGroup]
-        filteredGoods(subId: Int!, filters: AllFilterState): [Good]
+        filteredGoods(
+            subId: Int!
+            filters: AllFilterState
+            skip: Int
+            take: Int
+            sort: Int
+        ): FilteredGoodsFetch
         getBrands(search: String, skip: Int, take: Int): [Brand]
         getGoodTypesBySearch(search: String!): [SubGoodsType]
         getCharacteristicGroupsByGoodId(
