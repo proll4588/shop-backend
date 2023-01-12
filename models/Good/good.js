@@ -644,9 +644,9 @@ export const removeGoodPhoto = async (photoId) => {
 export const getGoods = async (search = '', skip = 0, take = 10) => {
     const isSearchNum = !!search && isNumeric(search)
     const id = isSearchNum ? Number(search) : undefined
-    const searchStr = search && search.length ? search : undefined
+    const searchStr = search && search.length ? search : ''
 
-    return await prisma.goods_catalog.findMany({
+    const goods = await prisma.goods_catalog.findMany({
         where: {
             OR: [
                 { id: id },
@@ -661,6 +661,22 @@ export const getGoods = async (search = '', skip = 0, take = 10) => {
         skip: skip,
         take: take,
     })
+
+    const ans = await prisma.goods_catalog.aggregate({
+        where: {
+            OR: [
+                { id: id },
+                {
+                    name: {
+                        contains: searchStr,
+                    },
+                },
+            ],
+        },
+        _count: true,
+    })
+
+    return { goods, count: ans._count }
 }
 
 /* Получение производителей по поиску */
@@ -854,3 +870,11 @@ export const deleteLocalType = async (localTypeId) =>
 
 export const deleteSubType = async (subTypeId) =>
     await prisma.sub_type_goods.delete({ where: { id: subTypeId } })
+
+// export const searchOrders = async (search) => {
+//     return await prisma.orders.findUnique({
+//         where: {
+//             id: search,
+//         },
+//     })
+// }
