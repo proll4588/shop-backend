@@ -31,6 +31,7 @@ import {
     removeGoodFromCart,
     removeGoodFromFavorite,
     removeGoodPhoto,
+    // searchOrders,
     setMainGoodPhoto,
     updateGlobalType,
     updateGoodData,
@@ -59,7 +60,12 @@ import {
 } from './models/Characteristics/characteristics.js'
 import { throwNewGQLError } from './GraphQLError.js'
 import { savePhoto } from './photo.js'
-import { createOrder, getOrders } from './models/Order/order.js'
+import {
+    createOrder,
+    getAdminOrders,
+    getOrders,
+    updateOrderStatus,
+} from './models/Order/order.js'
 import { createBrand } from './models/Brand/brand.js'
 
 /*========================/ Controles /=============================*/
@@ -134,6 +140,8 @@ const qDeleteGlobalType = async (globalTypeId) =>
 const qDeleteLocalType = async (globalTypeId) =>
     await deleteLocalType(globalTypeId)
 const qDeleteSubType = async (globalTypeId) => await deleteSubType(globalTypeId)
+
+const qSearchOrders = async (search) => await searchOrders(search)
 
 // --С авторизацией
 const qGetFavorite = async (context) => {
@@ -326,6 +334,12 @@ const qGetOrders = async (context, skip, take, operStatus, search) => {
 
     return await getOrders(userId, skip, take, operStatus, search)
 }
+
+const qGetAdminOrders = async (skip, take, operStatus, search) =>
+    await getAdminOrders(skip, take, operStatus, search)
+
+const qUpdateOrderStatus = async (orderId, status) =>
+    await updateOrderStatus(orderId, status)
 /* ======= */
 
 /*==================================================================*/
@@ -369,6 +383,9 @@ const resolvers = {
 
         findGlobalType: async (_, { search }) => await qFindGlobalTypes(search),
         findLocalType: async (_, { search }) => await qFindLocalTypes(search),
+
+        // searchOrders: async (_, { search }) => await qSearchOrders(search),
+        // getAdminOrders
         /* ======= */
 
         /* Filters */
@@ -393,6 +410,9 @@ const resolvers = {
         /* Orders */
         getOrders: async (_, { skip, take, operStatus, search }, context) =>
             await qGetOrders(context, skip, take, operStatus, search),
+
+        getAdminOrders: async (_, { skip, take, operStatus, search }) =>
+            await qGetAdminOrders(skip, take, operStatus, search),
         /* ======= */
     },
     Mutation: {
@@ -494,6 +514,9 @@ const resolvers = {
         /* Order */
         createOrder: async (_, { payStatus, orderType }, context) =>
             await qCreateOrder(context, payStatus, orderType),
+
+        updateOrderStatus: async (_, { orderId, status }) =>
+            await qUpdateOrderStatus(orderId, status),
         /* ======= */
     },
 }

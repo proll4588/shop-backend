@@ -38,6 +38,14 @@ const orderSelect = {
             prices: true,
         },
     },
+    users: {
+        select: {
+            id: true,
+            email: true,
+            phone_number: true,
+            photo: true,
+        },
+    },
 }
 
 /* Оформление заказа */
@@ -143,4 +151,67 @@ export const getOrders = async (
     })
 
     return { data, count }
+}
+
+export const getAdminOrders = async (
+    skip = 0,
+    take = 200,
+    operStatus = undefined,
+    search = ''
+) => {
+    const statusId = operStatus ? operStatuses[operStatus] : undefined
+
+    const isSearchNum = !!search && isNumeric(search)
+    const id = isSearchNum ? Number(search) : undefined
+    const searchStr = search && search.length ? search : undefined
+
+    const data = await prisma.orders.findMany({
+        where: {
+            operations_status_id: statusId,
+            OR: [
+                { id: id },
+                {
+                    delivery_info: {
+                        every: {
+                            goods_catalog: { name: { contains: searchStr } },
+                        },
+                    },
+                },
+            ],
+        },
+        select: {
+            ...orderSelect,
+        },
+        take,
+        skip,
+    })
+
+    const count = await prisma.orders.count({
+        where: {
+            operations_status_id: statusId,
+            OR: [
+                { id: id },
+                {
+                    delivery_info: {
+                        every: {
+                            goods_catalog: { name: { contains: searchStr } },
+                        },
+                    },
+                },
+            ],
+        },
+    })
+
+    return { data, count }
+}
+
+export const updateOrderStatus = async (id, status) => {
+    return await prisma.orders.update({
+        where: {
+            id,
+        },
+        data: {
+            operations_status_id: operStatuses[status],
+        },
+    })
 }

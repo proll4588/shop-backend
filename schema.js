@@ -225,7 +225,7 @@ const typeDefs = gql`
     type Query {
         types: [GlobalGoodsType]
         good(id: Int!): Good
-        getGoods(search: String, skip: Int, take: Int): [Good]
+        getGoods(search: String, skip: Int, take: Int): GetGoods
         filters(subId: Int!): AllFilters
         goodCharacteristics(goodId: Int!): [CharacteristicGroup]
         filteredGoods(
@@ -269,6 +269,16 @@ const typeDefs = gql`
             operStatus: String
             search: String
         ): GetOrders
+
+        #searchOrders(search: Int!): Order
+
+        getAdminOrders(
+            skip: Int
+            take: Int
+            operStatus: String
+            search: String
+        ): GetOrders
+        #findOrderById(id: Int!): Order
 
         findGlobalType(search: String!): [GlobalGoodsType]
         findLocalType(search: String!): [LocalGoodsType]
@@ -340,6 +350,13 @@ const typeDefs = gql`
         deleteGlobalType(globalTypeId: Int!): GlobalGoodsType
         deleteLocalType(localTypeId: Int!): LocalGoodsType
         deleteSubType(subTypeId: Int!): SubGoodsType
+
+        updateOrderStatus(orderId: Int!, status: String!): Order
+    }
+
+    type GetGoods {
+        count: Int!
+        goods: [Good]
     }
 
     type File {
@@ -440,6 +457,13 @@ const typeDefs = gql`
         data: [Order]
     }
 
+    type OrderUser {
+        id: Int!
+        email: String
+        photo: String
+        phone_number: String
+    }
+
     type Order {
         id: Int!
         date: date!
@@ -447,6 +471,7 @@ const typeDefs = gql`
         payment_status_id: Int!
         order_types_id: Int!
         delivery_info: [DeliveryInfo]
+        users: OrderUser
     }
 
     type DeliveryInfo {
