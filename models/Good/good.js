@@ -8,6 +8,7 @@ export const goodSelect = {
     description: true,
     main_photo: true,
     all_photos: true,
+    show: true,
     current_price: {
         select: {
             id: true,
@@ -124,7 +125,7 @@ export const getGoodsByFlters = async (
     let goods
     if (!filters)
         goods = await prisma.goods_catalog.findMany({
-            where: { sub_type_goods_id: typeId },
+            where: { sub_type_goods_id: typeId, show: true },
             orderBy: {
                 current_price: {
                     price: sort === 0 || sort === 1 ? 'asc' : 'desc',
@@ -137,7 +138,7 @@ export const getGoodsByFlters = async (
     else {
         if (filters === null) return { goods: [], totalCount: 0 }
         goods = await prisma.goods_catalog.findMany({
-            where: filteredSearch(filters, typeId),
+            where: { ...filteredSearch(filters, typeId), show: true },
             orderBy: {
                 current_price: {
                     price: sort === 0 || sort === 1 ? 'asc' : 'desc',
@@ -157,12 +158,12 @@ export const countGoodsByFlters = async (filters, typeId) => {
     if (filters === null) return 0
     if (!filters)
         data = await prisma.goods_catalog.aggregate({
-            where: { sub_type_goods_id: typeId },
+            where: { sub_type_goods_id: typeId, show: true },
             _count: true,
         })
     else
         data = await prisma.goods_catalog.aggregate({
-            where: filteredSearch(filters, typeId),
+            where: { ...filteredSearch(filters, typeId), show: true },
             _count: true,
         })
 
@@ -494,6 +495,7 @@ export const getPriceRange = async (typeId) => {
         where: {
             goods_catalog_goods_catalog_price_idToprices: {
                 sub_type_goods_id: typeId,
+                show: true,
             },
         },
         _max: {
@@ -871,10 +873,8 @@ export const deleteLocalType = async (localTypeId) =>
 export const deleteSubType = async (subTypeId) =>
     await prisma.sub_type_goods.delete({ where: { id: subTypeId } })
 
-// export const searchOrders = async (search) => {
-//     return await prisma.orders.findUnique({
-//         where: {
-//             id: search,
-//         },
-//     })
-// }
+export const changeGoodStatus = async (goodId, status) =>
+    await prisma.goods_catalog.update({
+        where: { id: goodId },
+        data: { show: status },
+    })
