@@ -9,6 +9,7 @@ import {
     addSubType,
     changeGoodCountInCart,
     changeGoodPrice,
+    changeGoodStatus,
     createGood,
     createGoodRating,
     deleteGlobalType,
@@ -67,6 +68,10 @@ import {
     updateOrderStatus,
 } from './models/Order/order.js'
 import { createBrand } from './models/Brand/brand.js'
+import {
+    getBuyDynamicByYear,
+    getGlobalTypeBuyDynamicByRange,
+} from './models/Statistic/statistic.js'
 
 /*========================/ Controles /=============================*/
 
@@ -141,7 +146,13 @@ const qDeleteLocalType = async (globalTypeId) =>
     await deleteLocalType(globalTypeId)
 const qDeleteSubType = async (globalTypeId) => await deleteSubType(globalTypeId)
 
-const qSearchOrders = async (search) => await searchOrders(search)
+// const qSearchOrders = async (search) => await searchOrders(search)
+const qChangeGoodStatus = async (goodId, status) =>
+    await changeGoodStatus(goodId, status)
+
+const qGetBuyDynamicByYear = async (year) => await getBuyDynamicByYear(year)
+const qGetGlobalTypeBuyDynamicByRange = async (startDate, endDate) =>
+    await getGlobalTypeBuyDynamicByRange(startDate, endDate)
 
 // --С авторизацией
 const qGetFavorite = async (context) => {
@@ -384,6 +395,11 @@ const resolvers = {
         findGlobalType: async (_, { search }) => await qFindGlobalTypes(search),
         findLocalType: async (_, { search }) => await qFindLocalTypes(search),
 
+        getBuyDynamicByYear: async (_, { year }) =>
+            await qGetBuyDynamicByYear(year),
+        getGlobalTypeBuyDynamicByRange: async (_, { startDate, endDate }) =>
+            await qGetGlobalTypeBuyDynamicByRange(startDate, endDate),
+
         // searchOrders: async (_, { search }) => await qSearchOrders(search),
         // getAdminOrders
         /* ======= */
@@ -486,6 +502,9 @@ const resolvers = {
             await qDeleteLocalType(localTypeId),
         deleteSubType: async (_, { subTypeId }) =>
             await qDeleteSubType(subTypeId),
+
+        changeGoodStatus: async (_, { goodId, status }) =>
+            await qChangeGoodStatus(goodId, status),
         /* ======= */
 
         /* Auth */

@@ -63,6 +63,7 @@ const typeDefs = gql`
         id: Int!
         name: String!
         description: String
+        show: Boolean!
 
         main_photo: Photo
         all_photos: [Photo]
@@ -282,6 +283,12 @@ const typeDefs = gql`
 
         findGlobalType(search: String!): [GlobalGoodsType]
         findLocalType(search: String!): [LocalGoodsType]
+
+        getBuyDynamicByYear(year: Int!): [MonthStat]
+        getGlobalTypeBuyDynamicByRange(
+            startDate: date!
+            endDate: date!
+        ): GlobalTypeStats
     }
 
     type Mutation {
@@ -352,6 +359,8 @@ const typeDefs = gql`
         deleteSubType(subTypeId: Int!): SubGoodsType
 
         updateOrderStatus(orderId: Int!, status: String!): Order
+
+        changeGoodStatus(goodId: Int!, status: Boolean!): Good
     }
 
     type GetGoods {
@@ -478,7 +487,7 @@ const typeDefs = gql`
         id: Int!
         goods_catalog: Good!
         count: Int!
-        prices: Price
+        price: Float!
     }
 
     enum PayStatus {
@@ -489,6 +498,22 @@ const typeDefs = gql`
     enum OrderTypes {
         deliver
         fromShop
+    }
+
+    type MonthStat {
+        date: date!
+        profit: Float
+    }
+
+    type GlobalTypeStats {
+        startDate: date!
+        endDate: date!
+        data: [GlobalTypeStat]
+    }
+
+    type GlobalTypeStat {
+        profit: Float
+        globalType: GlobalGoodsType!
     }
 `
 
