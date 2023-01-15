@@ -1,6 +1,12 @@
 import prisma from '../../controllers/prisma.controller.js'
 import { goodSelect } from '../Good/good.js'
 
+function randomInteger(min, max) {
+    // получить случайное число от (min-0.5) до (max+0.5)
+    let rand = min - 0.5 + Math.random() * (max - min + 1)
+    return Math.round(rand)
+}
+
 // В инструменты
 const isNumeric = (n) => !isNaN(n)
 
@@ -35,7 +41,7 @@ const orderSelect = {
                 select: goodSelect,
             },
             count: true,
-            prices: true,
+            price: true,
         },
     },
     users: {
@@ -56,7 +62,11 @@ export const createOrder = async (userId, payStatus, orderType) => {
             users_id: userId,
         },
         include: {
-            goods_catalog: true,
+            goods_catalog: {
+                include: {
+                    current_price: true,
+                },
+            },
         },
     })
 
@@ -64,6 +74,7 @@ export const createOrder = async (userId, payStatus, orderType) => {
     if (!cartGoods.length) throw 'GOOD_NOT_FOUND'
 
     // Создаём объект заказа
+    // const dateNow = new Date(2022, randomInteger(0, 11), 10)
     const dateNow = new Date()
     const order = await prisma.orders.create({
         data: {
@@ -79,9 +90,11 @@ export const createOrder = async (userId, payStatus, orderType) => {
     await prisma.delivery_info.createMany({
         data: cartGoods.map((good) => ({
             orders_id: order.id,
-            goods_catalog_id: good.goods_catalog_id,
+            goods_catalog_id: good.goods_catalog.id,
             count: good.count,
-            prices_id: good.goods_catalog.price_id,
+            price:
+                good.goods_catalog.current_price.discount ||
+                good.goods_catalog.current_price.price,
         })),
     })
 
