@@ -372,3 +372,15 @@ model goods_statistics {
 
   @@index([goods_catalog_id], map: "goods_statistics_goods_catalog_id_fk")
 }
+
+model data {
+  id    Int     @id @unique(map: "id") @default(autoincrement())
+  name  String  @unique(map: "name") @db.VarChar(255)
+  value String? @db.VarChar(1000)
+}
+
+model visits {
+  id     Int      @id @unique(map: "id") @default(autoincrement())
+  date   DateTime @unique(map: "date") @db.Date
+  visits Int      @default(0)
+}
