@@ -69,8 +69,14 @@ import {
 } from './models/Order/order.js'
 import { createBrand } from './models/Brand/brand.js'
 import {
+    addVisit,
     getBuyDynamicByYear,
     getGlobalTypeBuyDynamicByRange,
+    getLocalTypeBuyDynamocByRange,
+    getOrderCountMonth,
+    getProfitByMonth,
+    getSubTypeBuyDynamocByRange,
+    getVisitMonth,
 } from './models/Statistic/statistic.js'
 
 /*========================/ Controles /=============================*/
@@ -153,6 +159,15 @@ const qChangeGoodStatus = async (goodId, status) =>
 const qGetBuyDynamicByYear = async (year) => await getBuyDynamicByYear(year)
 const qGetGlobalTypeBuyDynamicByRange = async (startDate, endDate) =>
     await getGlobalTypeBuyDynamicByRange(startDate, endDate)
+const qGetLocalTypeBuyDynamicByRange = async (
+    globalTypeId,
+    startDate,
+    endDate
+) => await getLocalTypeBuyDynamocByRange(globalTypeId, startDate, endDate)
+const qGetSubTypeBuyDynamicByRange = async (localTypeId, startDate, endDate) =>
+    await getSubTypeBuyDynamocByRange(localTypeId, startDate, endDate)
+
+const qGetProfitByMonth = async (date) => await getProfitByMonth(date)
 
 // --С авторизацией
 const qGetFavorite = async (context) => {
@@ -353,6 +368,10 @@ const qUpdateOrderStatus = async (orderId, status) =>
     await updateOrderStatus(orderId, status)
 /* ======= */
 
+const qAddVisit = async () => await addVisit()
+const qGetVisitMonth = async () => await getVisitMonth()
+const qGetOrderCountMonth = async () => await getOrderCountMonth()
+
 /*==================================================================*/
 
 // TODO: Реализовать поиск минимальной и максимальной цены
@@ -399,6 +418,22 @@ const resolvers = {
             await qGetBuyDynamicByYear(year),
         getGlobalTypeBuyDynamicByRange: async (_, { startDate, endDate }) =>
             await qGetGlobalTypeBuyDynamicByRange(startDate, endDate),
+        getLocalTypeBuyDynamicByRange: async (
+            _,
+            { globalTypeId, startDate, endDate }
+        ) =>
+            await qGetLocalTypeBuyDynamicByRange(
+                globalTypeId,
+                startDate,
+                endDate
+            ),
+        getSubTypeBuyDynamicByRange: async (
+            _,
+            { localTypeId, startDate, endDate }
+        ) =>
+            await qGetSubTypeBuyDynamicByRange(localTypeId, startDate, endDate),
+
+        getProfitByMonth: async (_, { date }) => await qGetProfitByMonth(date),
 
         // searchOrders: async (_, { search }) => await qSearchOrders(search),
         // getAdminOrders
@@ -430,6 +465,9 @@ const resolvers = {
         getAdminOrders: async (_, { skip, take, operStatus, search }) =>
             await qGetAdminOrders(skip, take, operStatus, search),
         /* ======= */
+
+        getVisitMonth: async () => await qGetVisitMonth(),
+        getOrderCountMonth: async () => await qGetOrderCountMonth(),
     },
     Mutation: {
         /* Good */
@@ -537,6 +575,8 @@ const resolvers = {
         updateOrderStatus: async (_, { orderId, status }) =>
             await qUpdateOrderStatus(orderId, status),
         /* ======= */
+
+        addVisit: async () => await qAddVisit(),
     },
 }
 

@@ -289,6 +289,20 @@ const typeDefs = gql`
             startDate: date!
             endDate: date!
         ): GlobalTypeStats
+        getLocalTypeBuyDynamicByRange(
+            globalTypeId: Int
+            startDate: date!
+            endDate: date!
+        ): LocalTypeStats
+        getSubTypeBuyDynamicByRange(
+            localTypeId: Int
+            startDate: date!
+            endDate: date!
+        ): SubTypeStats
+
+        getProfitByMonth(date: date): MonthStats
+        getVisitMonth: MonthVisit
+        getOrderCountMonth: MonthOrderCount
     }
 
     type Mutation {
@@ -361,6 +375,7 @@ const typeDefs = gql`
         updateOrderStatus(orderId: Int!, status: String!): Order
 
         changeGoodStatus(goodId: Int!, status: Boolean!): Good
+        addVisit: Boolean
     }
 
     type GetGoods {
@@ -514,6 +529,47 @@ const typeDefs = gql`
     type GlobalTypeStat {
         profit: Float
         globalType: GlobalGoodsType!
+    }
+
+    type LocalTypeStats {
+        startDate: date!
+        endDate: date!
+        data: [LocalTypeStat]
+    }
+
+    type LocalTypeStat {
+        profit: Float
+        localType: LocalGoodsType!
+    }
+
+    type SubTypeStats {
+        startDate: date!
+        endDate: date!
+        data: [SubTypeStat]
+    }
+
+    type SubTypeStat {
+        profit: Float
+        subType: SubGoodsType!
+    }
+
+    type MonthStats {
+        currentMonth: MonthStat
+        lastMonth: MonthStat
+    }
+
+    type MonthStat {
+        profit: Float
+    }
+
+    type MonthVisit {
+        curVisits: Int!
+        lastVisits: Int!
+    }
+
+    type MonthOrderCount {
+        curOrderCount: Int!
+        lastOrderCount: Int!
     }
 `
 
