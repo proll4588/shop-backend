@@ -5,11 +5,12 @@ import bcrypt from 'bcrypt'
 import { throwNewGQLError } from './GraphQLError.js'
 import { createUser, getUserByEmail } from './models/User/user.js'
 
+// TODO: Сделать списаок админов
 const secret = process.env.SECRET
 
 // TODO: В отдельный файл
 export const signJWT = (id) => {
-    const isAdmin = id === 11
+    const isAdmin = id === 6
     return jwt.sign({ id, isAdmin }, secret, { expiresIn: '24h' })
 }
 
@@ -49,7 +50,7 @@ export const login = async (email, password) => {
 
     /* Если всё ок, то подписываем токен и отправляем клиенту */
     const token = signJWT(user.id)
-    return { token, isAdmin: user.id === 11 }
+    return { token, isAdmin: user.id === 6 }
 }
 
 /* Регистрация пользователя */
