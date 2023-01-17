@@ -93,8 +93,8 @@ export const createOrder = async (userId, payStatus, orderType) => {
             goods_catalog_id: good.goods_catalog.id,
             count: good.count,
             price:
-                good.goods_catalog.current_price.discount ||
-                good.goods_catalog.current_price.price,
+                (good.goods_catalog.current_price.discount ||
+                    good.goods_catalog.current_price.price) * good.count,
         })),
     })
 
