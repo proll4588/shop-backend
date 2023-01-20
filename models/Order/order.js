@@ -1,5 +1,6 @@
 import prisma from '../../controllers/prisma.controller.js'
 import { goodSelect } from '../Good/good.js'
+import { addGoodCountToStorage } from '../Supply/supply.js'
 
 function randomInteger(min, max) {
     // получить случайное число от (min-0.5) до (max+0.5)
@@ -127,6 +128,9 @@ export const getOrders = async (
     const searchStr = search && search.length ? search : undefined
 
     const data = await prisma.orders.findMany({
+        orderBy: {
+            date: 'desc',
+        },
         where: {
             users_id: userId,
             operations_status_id: statusId,
@@ -179,6 +183,9 @@ export const getAdminOrders = async (
     const searchStr = search && search.length ? search : undefined
 
     const data = await prisma.orders.findMany({
+        orderBy: {
+            date: 'desc',
+        },
         where: {
             operations_status_id: statusId,
             OR: [
@@ -219,6 +226,22 @@ export const getAdminOrders = async (
 }
 
 export const updateOrderStatus = async (id, status) => {
+    if (status === 'denied') {
+        const info = await prisma.delivery_info.findMany({
+            where: {
+                orders_id: id,
+            },
+            select: {
+                goods_catalog_id: true,
+                count: true,
+            },
+        })
+
+        for (var i = 0; i < info.length; i++) {
+            await addGoodCountToStorage(info[i].goods_catalog_id, info[i].count)
+        }
+    }
+
     return await prisma.orders.update({
         where: {
             id,
