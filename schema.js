@@ -303,6 +303,8 @@ const typeDefs = gql`
         getProfitByMonth(date: date): MonthStats
         getVisitMonth: MonthVisit
         getOrderCountMonth: MonthOrderCount
+
+        getSuppliers(take: Int, skip: Int, search: String): [Supplier]
     }
 
     type Mutation {
@@ -376,6 +378,13 @@ const typeDefs = gql`
 
         changeGoodStatus(goodId: Int!, status: Boolean!): Good
         addVisit: Boolean
+        createSuppliers(
+            name: String!
+            addres: String!
+            phone: String!
+            email: String!
+        ): Supplier
+        createSupplies(supData: [SupplieData]!, supId: Int!): Supplie
     }
 
     type GetGoods {
@@ -570,6 +579,25 @@ const typeDefs = gql`
     type MonthOrderCount {
         curOrderCount: Int!
         lastOrderCount: Int!
+    }
+
+    type Supplier {
+        id: Int!
+        name: String!
+        addres: String!
+        phone: String!
+        email: String
+    }
+
+    input SupplieData {
+        goodId: Int!
+        count: Int!
+    }
+
+    type Supplie {
+        id: Int!
+        date: date!
+        suppliers_id: Int!
     }
 `
 

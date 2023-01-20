@@ -78,6 +78,11 @@ import {
     getSubTypeBuyDynamocByRange,
     getVisitMonth,
 } from './models/Statistic/statistic.js'
+import {
+    createSuppliers,
+    createSupplies,
+    getSuppliers,
+} from './models/Supply/supply.js'
 
 /*========================/ Controles /=============================*/
 
@@ -372,6 +377,12 @@ const qAddVisit = async () => await addVisit()
 const qGetVisitMonth = async () => await getVisitMonth()
 const qGetOrderCountMonth = async () => await getOrderCountMonth()
 
+const qCreateSuppliers = async (name, addres, phone, email) =>
+    await createSuppliers(name, addres, phone, email)
+const qGetSuppliers = async (skip, take, search) =>
+    await getSuppliers(skip, take, search)
+const qCreateSupplies = async (data, supId) => await createSupplies(data, supId)
+
 /*==================================================================*/
 
 // TODO: Реализовать поиск минимальной и максимальной цены
@@ -468,6 +479,9 @@ const resolvers = {
 
         getVisitMonth: async () => await qGetVisitMonth(),
         getOrderCountMonth: async () => await qGetOrderCountMonth(),
+
+        getSuppliers: async (_, { skip, take, search }) =>
+            await qGetSuppliers(skip, take, search),
     },
     Mutation: {
         /* Good */
@@ -577,6 +591,11 @@ const resolvers = {
         /* ======= */
 
         addVisit: async () => await qAddVisit(),
+
+        createSuppliers: async (_, { name, addres, phone, email }) =>
+            await qCreateSuppliers(name, addres, phone, email),
+        createSupplies: async (_, { supData, supId }) =>
+            await qCreateSupplies(supData, supId),
     },
 }
 
